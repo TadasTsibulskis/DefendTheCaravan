@@ -3,11 +3,11 @@ GOALS
  1. Website
  2. Libraries / Components
  3. Main Game
+ 4. Misc
 
 ----------------------------------------------------------------------
 
 1) Website
-
  * to-do board with task managing
  
  
@@ -21,3 +21,10 @@ GOALS
     * Animate once, on loop, or certain frames (give range, with try / catch for error handling)
     * Auto load all images from supplied directory in instructor and create system to easily find + animate per character / directory name
     * Pass array of images to auto load to loader of game
+    
+    
+3) Main Game
+
+
+4) Misc
+ * Create gitignore and readme.md
