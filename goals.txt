@@ -1,0 +1,23 @@
+GOALS
+ INDEX 
+ 1. Website
+ 2. Libraries / Components
+ 3. Main Game
+
+----------------------------------------------------------------------
+
+1) Website
+
+ * to-do board with task managing
+ 
+ 
+2) Libraries / Components
+ a) Work Flow
+    * NPM (modular design)
+    * Grunt (browserify, etc)
+    
+ 
+ b) Animation Manager
+    * Animate once, on loop, or certain frames (give range, with try / catch for error handling)
+    * Auto load all images from supplied directory in instructor and create system to easily find + animate per character / directory name
+    * Pass array of images to auto load to loader of game
