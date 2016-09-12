@@ -1,1 +1,2 @@
-// TO DO : Add all JS here
+require('jquery');
+

@@ -1,0 +1,23 @@
+{
+  "name": "towerdefense",
+  "version": "1.0.0",
+  "description": "Tower Defense JS (name pending)",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "testGame"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TadasTsibulskis/TowerDefenseJS.git"
+  },
+  "author": "Tadas Tsibulskis",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/TadasTsibulskis/TowerDefenseJS/issues"
+  },
+  "homepage": "https://github.com/TadasTsibulskis/TowerDefenseJS#readme",
+  "devDependencies": {
+    "jquery": "^3.1.0",
+    "pixi.js": "^4.0.1"
+  }
+}
