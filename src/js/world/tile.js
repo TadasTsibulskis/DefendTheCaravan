@@ -2,30 +2,25 @@
 
 var PIXI = require('pixi.js');
 
-var type;
-var width;
-var height;
-
-var tile = function (type, width, height) {
-    var Tile = PIXI.Sprite;
-    Tile.width = width;
-    Tile.height = height;
+var tile = function (WORLD_CONFIG, type) {
+	var tileName = '';
     switch (type) {
-        case 0 : {
-            Tile.type = 'dirt';
-            Tile.fromFrame('dirt');
-            break;
-        }
+		case 0 : {
+			tileName = WORLD_CONFIG.tile_names.grass;
+			break;
+		}
 
-        default : {
-            break;
-        }
-    }
-    return Tile;
+		default : {
+			break;
+		}
+	}
+	var texture = PIXI.Texture.fromImage(WORLD_CONFIG.constants.assetLocation + tileName);
+	PIXI.extras.TilingSprite.call(this, texture, WORLD_CONFIG.constants.tileWidth, WORLD_CONFIG.constants.tileHeight);
+	return texture;
 };
 
 module.exports = {
-    init: function() {
-        return tile();
+    init: function (WORLD_CONFIG, type) {
+        return tile (WORLD_CONFIG, type);
     }
 };

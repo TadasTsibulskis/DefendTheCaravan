@@ -11,10 +11,13 @@ var WORLD_CONFIG = require('./utils/worldConfig.js');
 
 // Stage stuff
 var stageSetup = require('./stage/stageSetup.js');
+var worldSetup = require('./world/worldSetup.js');
 
 var viewController = function () {
+    debugger;
     var $STAGE = stageSetup.init(GAME_CONFIG);
-    var $WORLD = worldSetup.init(WORLD_CONFIG)
+    var $WORLD = worldSetup.init(WORLD_CONFIG);
+    $STAGE.addChild($WORLD);
 };
 
 module.exports = {
