@@ -1,698 +1,4 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = eachLimit;
-
-var _eachOfLimit = require('./internal/eachOfLimit');
-
-var _eachOfLimit2 = _interopRequireDefault(_eachOfLimit);
-
-var _withoutIndex = require('./internal/withoutIndex');
-
-var _withoutIndex2 = _interopRequireDefault(_withoutIndex);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/**
- * The same as [`each`]{@link module:Collections.each} but runs a maximum of `limit` async operations at a time.
- *
- * @name eachLimit
- * @static
- * @memberOf module:Collections
- * @method
- * @see [async.each]{@link module:Collections.each}
- * @alias forEachLimit
- * @category Collection
- * @param {Array|Iterable|Object} coll - A colleciton to iterate over.
- * @param {number} limit - The maximum number of async operations at a time.
- * @param {Function} iteratee - A function to apply to each item in `coll`. The
- * iteratee is passed a `callback(err)` which must be called once it has
- * completed. If no error has occurred, the `callback` should be run without
- * arguments or with an explicit `null` argument. The array index is not passed
- * to the iteratee. Invoked with (item, callback). If you need the index, use
- * `eachOfLimit`.
- * @param {Function} [callback] - A callback which is called when all
- * `iteratee` functions have finished, or an error occurs. Invoked with (err).
- */
-function eachLimit(coll, limit, iteratee, callback) {
-  (0, _eachOfLimit2.default)(limit)(coll, (0, _withoutIndex2.default)(iteratee), callback);
-}
-module.exports = exports['default'];
-},{"./internal/eachOfLimit":5,"./internal/withoutIndex":12}],2:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _eachLimit = require('./eachLimit');
-
-var _eachLimit2 = _interopRequireDefault(_eachLimit);
-
-var _doLimit = require('./internal/doLimit');
-
-var _doLimit2 = _interopRequireDefault(_doLimit);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/**
- * The same as [`each`]{@link module:Collections.each} but runs only a single async operation at a time.
- *
- * @name eachSeries
- * @static
- * @memberOf module:Collections
- * @method
- * @see [async.each]{@link module:Collections.each}
- * @alias forEachSeries
- * @category Collection
- * @param {Array|Iterable|Object} coll - A collection to iterate over.
- * @param {Function} iteratee - A function to apply to each
- * item in `coll`. The iteratee is passed a `callback(err)` which must be called
- * once it has completed. If no error has occurred, the `callback` should be run
- * without arguments or with an explicit `null` argument. The array index is
- * not passed to the iteratee. Invoked with (item, callback). If you need the
- * index, use `eachOfSeries`.
- * @param {Function} [callback] - A callback which is called when all
- * `iteratee` functions have finished, or an error occurs. Invoked with (err).
- */
-exports.default = (0, _doLimit2.default)(_eachLimit2.default, 1);
-module.exports = exports['default'];
-},{"./eachLimit":1,"./internal/doLimit":4}],3:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.default = DLL;
-// Simple doubly linked list (https://en.wikipedia.org/wiki/Doubly_linked_list) implementation
-// used for queues. This implementation assumes that the node provided by the user can be modified
-// to adjust the next and last properties. We implement only the minimal functionality
-// for queue support.
-function DLL() {
-    this.head = this.tail = null;
-    this.length = 0;
-}
-
-function setInitial(dll, node) {
-    dll.length = 1;
-    dll.head = dll.tail = node;
-}
-
-DLL.prototype.removeLink = function (node) {
-    if (node.prev) node.prev.next = node.next;else this.head = node.next;
-    if (node.next) node.next.prev = node.prev;else this.tail = node.prev;
-
-    node.prev = node.next = null;
-    this.length -= 1;
-    return node;
-};
-
-DLL.prototype.empty = DLL;
-
-DLL.prototype.insertAfter = function (node, newNode) {
-    newNode.prev = node;
-    newNode.next = node.next;
-    if (node.next) node.next.prev = newNode;else this.tail = newNode;
-    node.next = newNode;
-    this.length += 1;
-};
-
-DLL.prototype.insertBefore = function (node, newNode) {
-    newNode.prev = node.prev;
-    newNode.next = node;
-    if (node.prev) node.prev.next = newNode;else this.head = newNode;
-    node.prev = newNode;
-    this.length += 1;
-};
-
-DLL.prototype.unshift = function (node) {
-    if (this.head) this.insertBefore(this.head, node);else setInitial(this, node);
-};
-
-DLL.prototype.push = function (node) {
-    if (this.tail) this.insertAfter(this.tail, node);else setInitial(this, node);
-};
-
-DLL.prototype.shift = function () {
-    return this.head && this.removeLink(this.head);
-};
-
-DLL.prototype.pop = function () {
-    return this.tail && this.removeLink(this.tail);
-};
-module.exports = exports['default'];
-},{}],4:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.default = doLimit;
-function doLimit(fn, limit) {
-    return function (iterable, iteratee, callback) {
-        return fn(iterable, limit, iteratee, callback);
-    };
-}
-module.exports = exports['default'];
-},{}],5:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.default = _eachOfLimit;
-
-var _noop = require('lodash/noop');
-
-var _noop2 = _interopRequireDefault(_noop);
-
-var _once = require('./once');
-
-var _once2 = _interopRequireDefault(_once);
-
-var _iterator = require('./iterator');
-
-var _iterator2 = _interopRequireDefault(_iterator);
-
-var _onlyOnce = require('./onlyOnce');
-
-var _onlyOnce2 = _interopRequireDefault(_onlyOnce);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _eachOfLimit(limit) {
-    return function (obj, iteratee, callback) {
-        callback = (0, _once2.default)(callback || _noop2.default);
-        if (limit <= 0 || !obj) {
-            return callback(null);
-        }
-        var nextElem = (0, _iterator2.default)(obj);
-        var done = false;
-        var running = 0;
-
-        function iterateeCallback(err) {
-            running -= 1;
-            if (err) {
-                done = true;
-                callback(err);
-            } else if (done && running <= 0) {
-                return callback(null);
-            } else {
-                replenish();
-            }
-        }
-
-        function replenish() {
-            while (running < limit && !done) {
-                var elem = nextElem();
-                if (elem === null) {
-                    done = true;
-                    if (running <= 0) {
-                        callback(null);
-                    }
-                    return;
-                }
-                running += 1;
-                iteratee(elem.value, elem.key, (0, _onlyOnce2.default)(iterateeCallback));
-            }
-        }
-
-        replenish();
-    };
-}
-module.exports = exports['default'];
-},{"./iterator":7,"./once":8,"./onlyOnce":9,"lodash/noop":38}],6:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-exports.default = function (coll) {
-    return iteratorSymbol && coll[iteratorSymbol] && coll[iteratorSymbol]();
-};
-
-var iteratorSymbol = typeof Symbol === 'function' && Symbol.iterator;
-
-module.exports = exports['default'];
-},{}],7:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.default = iterator;
-
-var _isArrayLike = require('lodash/isArrayLike');
-
-var _isArrayLike2 = _interopRequireDefault(_isArrayLike);
-
-var _getIterator = require('./getIterator');
-
-var _getIterator2 = _interopRequireDefault(_getIterator);
-
-var _keys = require('lodash/keys');
-
-var _keys2 = _interopRequireDefault(_keys);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function createArrayIterator(coll) {
-    var i = -1;
-    var len = coll.length;
-    return function next() {
-        return ++i < len ? { value: coll[i], key: i } : null;
-    };
-}
-
-function createES2015Iterator(iterator) {
-    var i = -1;
-    return function next() {
-        var item = iterator.next();
-        if (item.done) return null;
-        i++;
-        return { value: item.value, key: i };
-    };
-}
-
-function createObjectIterator(obj) {
-    var okeys = (0, _keys2.default)(obj);
-    var i = -1;
-    var len = okeys.length;
-    return function next() {
-        var key = okeys[++i];
-        return i < len ? { value: obj[key], key: key } : null;
-    };
-}
-
-function iterator(coll) {
-    if ((0, _isArrayLike2.default)(coll)) {
-        return createArrayIterator(coll);
-    }
-
-    var iterator = (0, _getIterator2.default)(coll);
-    return iterator ? createES2015Iterator(iterator) : createObjectIterator(coll);
-}
-module.exports = exports['default'];
-},{"./getIterator":6,"lodash/isArrayLike":30,"lodash/keys":37}],8:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.default = once;
-function once(fn) {
-    return function () {
-        if (fn === null) return;
-        var callFn = fn;
-        fn = null;
-        callFn.apply(this, arguments);
-    };
-}
-module.exports = exports['default'];
-},{}],9:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.default = onlyOnce;
-function onlyOnce(fn) {
-    return function () {
-        if (fn === null) throw new Error("Callback was already called.");
-        var callFn = fn;
-        fn = null;
-        callFn.apply(this, arguments);
-    };
-}
-module.exports = exports['default'];
-},{}],10:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.default = queue;
-
-var _arrayEach = require('lodash/_arrayEach');
-
-var _arrayEach2 = _interopRequireDefault(_arrayEach);
-
-var _isArray = require('lodash/isArray');
-
-var _isArray2 = _interopRequireDefault(_isArray);
-
-var _noop = require('lodash/noop');
-
-var _noop2 = _interopRequireDefault(_noop);
-
-var _rest = require('lodash/rest');
-
-var _rest2 = _interopRequireDefault(_rest);
-
-var _onlyOnce = require('./onlyOnce');
-
-var _onlyOnce2 = _interopRequireDefault(_onlyOnce);
-
-var _setImmediate = require('./setImmediate');
-
-var _setImmediate2 = _interopRequireDefault(_setImmediate);
-
-var _DoublyLinkedList = require('./DoublyLinkedList');
-
-var _DoublyLinkedList2 = _interopRequireDefault(_DoublyLinkedList);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function queue(worker, concurrency, payload) {
-    if (concurrency == null) {
-        concurrency = 1;
-    } else if (concurrency === 0) {
-        throw new Error('Concurrency must not be zero');
-    }
-
-    function _insert(data, insertAtFront, callback) {
-        if (callback != null && typeof callback !== 'function') {
-            throw new Error('task callback must be a function');
-        }
-        q.started = true;
-        if (!(0, _isArray2.default)(data)) {
-            data = [data];
-        }
-        if (data.length === 0 && q.idle()) {
-            // call drain immediately if there are no tasks
-            return (0, _setImmediate2.default)(function () {
-                q.drain();
-            });
-        }
-        (0, _arrayEach2.default)(data, function (task) {
-            var item = {
-                data: task,
-                callback: callback || _noop2.default
-            };
-
-            if (insertAtFront) {
-                q._tasks.unshift(item);
-            } else {
-                q._tasks.push(item);
-            }
-        });
-        (0, _setImmediate2.default)(q.process);
-    }
-
-    function _next(tasks) {
-        return (0, _rest2.default)(function (args) {
-            workers -= 1;
-
-            (0, _arrayEach2.default)(tasks, function (task) {
-                (0, _arrayEach2.default)(workersList, function (worker, index) {
-                    if (worker === task) {
-                        workersList.splice(index, 1);
-                        return false;
-                    }
-                });
-
-                task.callback.apply(task, args);
-
-                if (args[0] != null) {
-                    q.error(args[0], task.data);
-                }
-            });
-
-            if (workers <= q.concurrency - q.buffer) {
-                q.unsaturated();
-            }
-
-            if (q.idle()) {
-                q.drain();
-            }
-            q.process();
-        });
-    }
-
-    var workers = 0;
-    var workersList = [];
-    var q = {
-        _tasks: new _DoublyLinkedList2.default(),
-        concurrency: concurrency,
-        payload: payload,
-        saturated: _noop2.default,
-        unsaturated: _noop2.default,
-        buffer: concurrency / 4,
-        empty: _noop2.default,
-        drain: _noop2.default,
-        error: _noop2.default,
-        started: false,
-        paused: false,
-        push: function (data, callback) {
-            _insert(data, false, callback);
-        },
-        kill: function () {
-            q.drain = _noop2.default;
-            q._tasks.empty();
-        },
-        unshift: function (data, callback) {
-            _insert(data, true, callback);
-        },
-        process: function () {
-            while (!q.paused && workers < q.concurrency && q._tasks.length) {
-                var tasks = [],
-                    data = [];
-                var l = q._tasks.length;
-                if (q.payload) l = Math.min(l, q.payload);
-                for (var i = 0; i < l; i++) {
-                    var node = q._tasks.shift();
-                    tasks.push(node);
-                    data.push(node.data);
-                }
-
-                if (q._tasks.length === 0) {
-                    q.empty();
-                }
-                workers += 1;
-                workersList.push(tasks[0]);
-
-                if (workers === q.concurrency) {
-                    q.saturated();
-                }
-
-                var cb = (0, _onlyOnce2.default)(_next(tasks));
-                worker(data, cb);
-            }
-        },
-        length: function () {
-            return q._tasks.length;
-        },
-        running: function () {
-            return workers;
-        },
-        workersList: function () {
-            return workersList;
-        },
-        idle: function () {
-            return q._tasks.length + workers === 0;
-        },
-        pause: function () {
-            q.paused = true;
-        },
-        resume: function () {
-            if (q.paused === false) {
-                return;
-            }
-            q.paused = false;
-            var resumeCount = Math.min(q.concurrency, q._tasks.length);
-            // Need to call q.process once per concurrent
-            // worker to preserve full concurrency after pause
-            for (var w = 1; w <= resumeCount; w++) {
-                (0, _setImmediate2.default)(q.process);
-            }
-        }
-    };
-    return q;
-}
-module.exports = exports['default'];
-},{"./DoublyLinkedList":3,"./onlyOnce":9,"./setImmediate":11,"lodash/_arrayEach":19,"lodash/isArray":29,"lodash/noop":38,"lodash/rest":39}],11:[function(require,module,exports){
-(function (process){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.hasNextTick = exports.hasSetImmediate = undefined;
-exports.fallback = fallback;
-exports.wrap = wrap;
-
-var _rest = require('lodash/rest');
-
-var _rest2 = _interopRequireDefault(_rest);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var hasSetImmediate = exports.hasSetImmediate = typeof setImmediate === 'function' && setImmediate;
-var hasNextTick = exports.hasNextTick = typeof process === 'object' && typeof process.nextTick === 'function';
-
-function fallback(fn) {
-    setTimeout(fn, 0);
-}
-
-function wrap(defer) {
-    return (0, _rest2.default)(function (fn, args) {
-        defer(function () {
-            fn.apply(null, args);
-        });
-    });
-}
-
-var _defer;
-
-if (hasSetImmediate) {
-    _defer = setImmediate;
-} else if (hasNextTick) {
-    _defer = process.nextTick;
-} else {
-    _defer = fallback;
-}
-
-exports.default = wrap(_defer);
-}).call(this,require('_process'))
-},{"_process":193,"lodash/rest":39}],12:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.default = _withoutIndex;
-function _withoutIndex(iteratee) {
-    return function (value, index, callback) {
-        return iteratee(value, callback);
-    };
-}
-module.exports = exports['default'];
-},{}],13:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-exports.default = function (worker, concurrency) {
-  return (0, _queue2.default)(function (items, cb) {
-    worker(items[0], cb);
-  }, concurrency, 1);
-};
-
-var _queue = require('./internal/queue');
-
-var _queue2 = _interopRequireDefault(_queue);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-module.exports = exports['default'];
-
-/**
- * A queue of tasks for the worker function to complete.
- * @typedef {Object} QueueObject
- * @memberOf module:ControlFlow
- * @property {Function} length - a function returning the number of items
- * waiting to be processed. Invoke with `queue.length()`.
- * @property {boolean} started - a boolean indicating whether or not any
- * items have been pushed and processed by the queue.
- * @property {Function} running - a function returning the number of items
- * currently being processed. Invoke with `queue.running()`.
- * @property {Function} workersList - a function returning the array of items
- * currently being processed. Invoke with `queue.workersList()`.
- * @property {Function} idle - a function returning false if there are items
- * waiting or being processed, or true if not. Invoke with `queue.idle()`.
- * @property {number} concurrency - an integer for determining how many `worker`
- * functions should be run in parallel. This property can be changed after a
- * `queue` is created to alter the concurrency on-the-fly.
- * @property {Function} push - add a new task to the `queue`. Calls `callback`
- * once the `worker` has finished processing the task. Instead of a single task,
- * a `tasks` array can be submitted. The respective callback is used for every
- * task in the list. Invoke with `queue.push(task, [callback])`,
- * @property {Function} unshift - add a new task to the front of the `queue`.
- * Invoke with `queue.unshift(task, [callback])`.
- * @property {Function} saturated - a callback that is called when the number of
- * running workers hits the `concurrency` limit, and further tasks will be
- * queued.
- * @property {Function} unsaturated - a callback that is called when the number
- * of running workers is less than the `concurrency` & `buffer` limits, and
- * further tasks will not be queued.
- * @property {number} buffer - A minimum threshold buffer in order to say that
- * the `queue` is `unsaturated`.
- * @property {Function} empty - a callback that is called when the last item
- * from the `queue` is given to a `worker`.
- * @property {Function} drain - a callback that is called when the last item
- * from the `queue` has returned from the `worker`.
- * @property {Function} error - a callback that is called when a task errors.
- * Has the signature `function(error, task)`.
- * @property {boolean} paused - a boolean for determining whether the queue is
- * in a paused state.
- * @property {Function} pause - a function that pauses the processing of tasks
- * until `resume()` is called. Invoke with `queue.pause()`.
- * @property {Function} resume - a function that resumes the processing of
- * queued tasks when the queue is paused. Invoke with `queue.resume()`.
- * @property {Function} kill - a function that removes the `drain` callback and
- * empties remaining tasks from the queue forcing it to go idle. Invoke with `queue.kill()`.
- */
-
-/**
- * Creates a `queue` object with the specified `concurrency`. Tasks added to the
- * `queue` are processed in parallel (up to the `concurrency` limit). If all
- * `worker`s are in progress, the task is queued until one becomes available.
- * Once a `worker` completes a `task`, that `task`'s callback is called.
- *
- * @name queue
- * @static
- * @memberOf module:ControlFlow
- * @method
- * @category Control Flow
- * @param {Function} worker - An asynchronous function for processing a queued
- * task, which must call its `callback(err)` argument when finished, with an
- * optional `error` as an argument.  If you want to handle errors from an
- * individual task, pass a callback to `q.push()`. Invoked with
- * (task, callback).
- * @param {number} [concurrency=1] - An `integer` for determining how many
- * `worker` functions should be run in parallel.  If omitted, the concurrency
- * defaults to `1`.  If the concurrency is `0`, an error is thrown.
- * @returns {module:ControlFlow.QueueObject} A queue object to manage the tasks. Callbacks can
- * attached as certain properties to listen for specific events during the
- * lifecycle of the queue.
- * @example
- *
- * // create a queue object with concurrency 2
- * var q = async.queue(function(task, callback) {
- *     console.log('hello ' + task.name);
- *     callback();
- * }, 2);
- *
- * // assign a callback
- * q.drain = function() {
- *     console.log('all items have been processed');
- * };
- *
- * // add some items to the queue
- * q.push({name: 'foo'}, function(err) {
- *     console.log('finished processing foo');
- * });
- * q.push({name: 'bar'}, function (err) {
- *     console.log('finished processing bar');
- * });
- *
- * // add some items to the queue (batch-wise)
- * q.push([{name: 'baz'},{name: 'bay'},{name: 'bax'}], function(err) {
- *     console.log('finished processing item');
- * });
- *
- * // add some items to the front of the queue
- * q.unshift({name: 'bar'}, function (err) {
- *     console.log('finished processing bar');
- * });
- */
-},{"./internal/queue":10}],14:[function(require,module,exports){
 /**
  * Bit twiddling hacks for JavaScript.
  *
@@ -898,7 +204,7 @@ exports.nextCombination = function(v) {
 }
 
 
-},{}],15:[function(require,module,exports){
+},{}],2:[function(require,module,exports){
 'use strict';
 
 module.exports = earcut;
@@ -1544,7 +850,7 @@ earcut.flatten = function (data) {
     return result;
 };
 
-},{}],16:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 'use strict';
 
 var has = Object.prototype.hasOwnProperty;
@@ -1835,7 +1141,7 @@ if ('undefined' !== typeof module) {
   module.exports = EventEmitter;
 }
 
-},{}],17:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 /**
  * isMobile.js v0.4.0
  *
@@ -1974,7 +1280,7 @@ if ('undefined' !== typeof module) {
 
 })(this);
 
-},{}],18:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 /**
  * A faster alternative to `Function#apply`, this function invokes `func`
  * with the `this` binding of `thisArg` and the arguments of `args`.
@@ -1997,7 +1303,7 @@ function apply(func, thisArg, args) {
 
 module.exports = apply;
 
-},{}],19:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 /**
  * A specialized version of `_.forEach` for arrays without support for
  * iteratee shorthands.
@@ -2021,7 +1327,7 @@ function arrayEach(array, iteratee) {
 
 module.exports = arrayEach;
 
-},{}],20:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 var baseTimes = require('./_baseTimes'),
     isArguments = require('./isArguments'),
     isArray = require('./isArray'),
@@ -2062,7 +1368,56 @@ function arrayLikeKeys(value, inherited) {
 
 module.exports = arrayLikeKeys;
 
-},{"./_baseTimes":23,"./_isIndex":24,"./isArguments":28,"./isArray":29}],21:[function(require,module,exports){
+},{"./_baseTimes":12,"./_isIndex":17,"./isArguments":30,"./isArray":31}],8:[function(require,module,exports){
+var isFunction = require('./isFunction'),
+    isMasked = require('./_isMasked'),
+    isObject = require('./isObject'),
+    toSource = require('./_toSource');
+
+/**
+ * Used to match `RegExp`
+ * [syntax characters](http://ecma-international.org/ecma-262/7.0/#sec-patterns).
+ */
+var reRegExpChar = /[\\^$.*+?()[\]{}|]/g;
+
+/** Used to detect host constructors (Safari). */
+var reIsHostCtor = /^\[object .+?Constructor\]$/;
+
+/** Used for built-in method references. */
+var funcProto = Function.prototype,
+    objectProto = Object.prototype;
+
+/** Used to resolve the decompiled source of functions. */
+var funcToString = funcProto.toString;
+
+/** Used to check objects for own properties. */
+var hasOwnProperty = objectProto.hasOwnProperty;
+
+/** Used to detect if a method is native. */
+var reIsNative = RegExp('^' +
+  funcToString.call(hasOwnProperty).replace(reRegExpChar, '\\$&')
+  .replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g, '$1.*?') + '$'
+);
+
+/**
+ * The base implementation of `_.isNative` without bad shim checks.
+ *
+ * @private
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a native function,
+ *  else `false`.
+ */
+function baseIsNative(value) {
+  if (!isObject(value) || isMasked(value)) {
+    return false;
+  }
+  var pattern = isFunction(value) ? reIsNative : reIsHostCtor;
+  return pattern.test(toSource(value));
+}
+
+module.exports = baseIsNative;
+
+},{"./_isMasked":18,"./_toSource":27,"./isFunction":34,"./isObject":36}],9:[function(require,module,exports){
 var isPrototype = require('./_isPrototype'),
     nativeKeys = require('./_nativeKeys');
 
@@ -2094,11 +1449,10 @@ function baseKeys(object) {
 
 module.exports = baseKeys;
 
-},{"./_isPrototype":25,"./_nativeKeys":26}],22:[function(require,module,exports){
-var apply = require('./_apply');
-
-/* Built-in method references for those with the same name as other `lodash` methods. */
-var nativeMax = Math.max;
+},{"./_isPrototype":19,"./_nativeKeys":21}],10:[function(require,module,exports){
+var identity = require('./identity'),
+    overRest = require('./_overRest'),
+    setToString = require('./_setToString');
 
 /**
  * The base implementation of `_.rest` which doesn't validate or coerce arguments.
@@ -2109,29 +1463,36 @@ var nativeMax = Math.max;
  * @returns {Function} Returns the new function.
  */
 function baseRest(func, start) {
-  start = nativeMax(start === undefined ? (func.length - 1) : start, 0);
-  return function() {
-    var args = arguments,
-        index = -1,
-        length = nativeMax(args.length - start, 0),
-        array = Array(length);
-
-    while (++index < length) {
-      array[index] = args[start + index];
-    }
-    index = -1;
-    var otherArgs = Array(start + 1);
-    while (++index < start) {
-      otherArgs[index] = args[index];
-    }
-    otherArgs[start] = array;
-    return apply(func, this, otherArgs);
-  };
+  return setToString(overRest(func, start, identity), func + '');
 }
 
 module.exports = baseRest;
 
-},{"./_apply":18}],23:[function(require,module,exports){
+},{"./_overRest":23,"./_setToString":25,"./identity":29}],11:[function(require,module,exports){
+var constant = require('./constant'),
+    identity = require('./identity'),
+    nativeDefineProperty = require('./_nativeDefineProperty');
+
+/**
+ * The base implementation of `setToString` without support for hot loop shorting.
+ *
+ * @private
+ * @param {Function} func The function to modify.
+ * @param {Function} string The `toString` result.
+ * @returns {Function} Returns `func`.
+ */
+var baseSetToString = !nativeDefineProperty ? identity : function(func, string) {
+  return nativeDefineProperty(func, 'toString', {
+    'configurable': true,
+    'enumerable': false,
+    'value': constant(string),
+    'writable': true
+  });
+};
+
+module.exports = baseSetToString;
+
+},{"./_nativeDefineProperty":20,"./constant":28,"./identity":29}],12:[function(require,module,exports){
 /**
  * The base implementation of `_.times` without support for iteratee shorthands
  * or max array length checks.
@@ -2153,7 +1514,57 @@ function baseTimes(n, iteratee) {
 
 module.exports = baseTimes;
 
-},{}],24:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
+var root = require('./_root');
+
+/** Used to detect overreaching core-js shims. */
+var coreJsData = root['__core-js_shared__'];
+
+module.exports = coreJsData;
+
+},{"./_root":24}],14:[function(require,module,exports){
+(function (global){
+/** Detect free variable `global` from Node.js. */
+var freeGlobal = typeof global == 'object' && global && global.Object === Object && global;
+
+module.exports = freeGlobal;
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],15:[function(require,module,exports){
+var baseIsNative = require('./_baseIsNative'),
+    getValue = require('./_getValue');
+
+/**
+ * Gets the native function at `key` of `object`.
+ *
+ * @private
+ * @param {Object} object The object to query.
+ * @param {string} key The key of the method to get.
+ * @returns {*} Returns the function if it's native, else `undefined`.
+ */
+function getNative(object, key) {
+  var value = getValue(object, key);
+  return baseIsNative(value) ? value : undefined;
+}
+
+module.exports = getNative;
+
+},{"./_baseIsNative":8,"./_getValue":16}],16:[function(require,module,exports){
+/**
+ * Gets the value at `key` of `object`.
+ *
+ * @private
+ * @param {Object} [object] The object to query.
+ * @param {string} key The key of the property to get.
+ * @returns {*} Returns the property value.
+ */
+function getValue(object, key) {
+  return object == null ? undefined : object[key];
+}
+
+module.exports = getValue;
+
+},{}],17:[function(require,module,exports){
 /** Used as references for various `Number` constants. */
 var MAX_SAFE_INTEGER = 9007199254740991;
 
@@ -2177,7 +1588,29 @@ function isIndex(value, length) {
 
 module.exports = isIndex;
 
-},{}],25:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
+var coreJsData = require('./_coreJsData');
+
+/** Used to detect methods masquerading as native. */
+var maskSrcKey = (function() {
+  var uid = /[^.]+$/.exec(coreJsData && coreJsData.keys && coreJsData.keys.IE_PROTO || '');
+  return uid ? ('Symbol(src)_1.' + uid) : '';
+}());
+
+/**
+ * Checks if `func` has its source masked.
+ *
+ * @private
+ * @param {Function} func The function to check.
+ * @returns {boolean} Returns `true` if `func` is masked, else `false`.
+ */
+function isMasked(func) {
+  return !!maskSrcKey && (maskSrcKey in func);
+}
+
+module.exports = isMasked;
+
+},{"./_coreJsData":13}],19:[function(require,module,exports){
 /** Used for built-in method references. */
 var objectProto = Object.prototype;
 
@@ -2197,7 +1630,15 @@ function isPrototype(value) {
 
 module.exports = isPrototype;
 
-},{}],26:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
+var getNative = require('./_getNative');
+
+/* Built-in method references that are verified to be native. */
+var nativeDefineProperty = getNative(Object, 'defineProperty');
+
+module.exports = nativeDefineProperty;
+
+},{"./_getNative":15}],21:[function(require,module,exports){
 var overArg = require('./_overArg');
 
 /* Built-in method references for those with the same name as other `lodash` methods. */
@@ -2205,7 +1646,7 @@ var nativeKeys = overArg(Object.keys, Object);
 
 module.exports = nativeKeys;
 
-},{"./_overArg":27}],27:[function(require,module,exports){
+},{"./_overArg":22}],22:[function(require,module,exports){
 /**
  * Creates a unary function that invokes `func` with its argument transformed.
  *
@@ -2222,7 +1663,190 @@ function overArg(func, transform) {
 
 module.exports = overArg;
 
+},{}],23:[function(require,module,exports){
+var apply = require('./_apply');
+
+/* Built-in method references for those with the same name as other `lodash` methods. */
+var nativeMax = Math.max;
+
+/**
+ * A specialized version of `baseRest` which transforms the rest array.
+ *
+ * @private
+ * @param {Function} func The function to apply a rest parameter to.
+ * @param {number} [start=func.length-1] The start position of the rest parameter.
+ * @param {Function} transform The rest array transform.
+ * @returns {Function} Returns the new function.
+ */
+function overRest(func, start, transform) {
+  start = nativeMax(start === undefined ? (func.length - 1) : start, 0);
+  return function() {
+    var args = arguments,
+        index = -1,
+        length = nativeMax(args.length - start, 0),
+        array = Array(length);
+
+    while (++index < length) {
+      array[index] = args[start + index];
+    }
+    index = -1;
+    var otherArgs = Array(start + 1);
+    while (++index < start) {
+      otherArgs[index] = args[index];
+    }
+    otherArgs[start] = transform(array);
+    return apply(func, this, otherArgs);
+  };
+}
+
+module.exports = overRest;
+
+},{"./_apply":5}],24:[function(require,module,exports){
+var freeGlobal = require('./_freeGlobal');
+
+/** Detect free variable `self`. */
+var freeSelf = typeof self == 'object' && self && self.Object === Object && self;
+
+/** Used as a reference to the global object. */
+var root = freeGlobal || freeSelf || Function('return this')();
+
+module.exports = root;
+
+},{"./_freeGlobal":14}],25:[function(require,module,exports){
+var baseSetToString = require('./_baseSetToString'),
+    shortOut = require('./_shortOut');
+
+/**
+ * Sets the `toString` method of `func` to return `string`.
+ *
+ * @private
+ * @param {Function} func The function to modify.
+ * @param {Function} string The `toString` result.
+ * @returns {Function} Returns `func`.
+ */
+var setToString = shortOut(baseSetToString);
+
+module.exports = setToString;
+
+},{"./_baseSetToString":11,"./_shortOut":26}],26:[function(require,module,exports){
+/** Used to detect hot functions by number of calls within a span of milliseconds. */
+var HOT_COUNT = 500,
+    HOT_SPAN = 16;
+
+/* Built-in method references for those with the same name as other `lodash` methods. */
+var nativeNow = Date.now;
+
+/**
+ * Creates a function that'll short out and invoke `identity` instead
+ * of `func` when it's called `HOT_COUNT` or more times in `HOT_SPAN`
+ * milliseconds.
+ *
+ * @private
+ * @param {Function} func The function to restrict.
+ * @returns {Function} Returns the new shortable function.
+ */
+function shortOut(func) {
+  var count = 0,
+      lastCalled = 0;
+
+  return function() {
+    var stamp = nativeNow(),
+        remaining = HOT_SPAN - (stamp - lastCalled);
+
+    lastCalled = stamp;
+    if (remaining > 0) {
+      if (++count >= HOT_COUNT) {
+        return arguments[0];
+      }
+    } else {
+      count = 0;
+    }
+    return func.apply(undefined, arguments);
+  };
+}
+
+module.exports = shortOut;
+
+},{}],27:[function(require,module,exports){
+/** Used for built-in method references. */
+var funcProto = Function.prototype;
+
+/** Used to resolve the decompiled source of functions. */
+var funcToString = funcProto.toString;
+
+/**
+ * Converts `func` to its source code.
+ *
+ * @private
+ * @param {Function} func The function to process.
+ * @returns {string} Returns the source code.
+ */
+function toSource(func) {
+  if (func != null) {
+    try {
+      return funcToString.call(func);
+    } catch (e) {}
+    try {
+      return (func + '');
+    } catch (e) {}
+  }
+  return '';
+}
+
+module.exports = toSource;
+
 },{}],28:[function(require,module,exports){
+/**
+ * Creates a function that returns `value`.
+ *
+ * @static
+ * @memberOf _
+ * @since 2.4.0
+ * @category Util
+ * @param {*} value The value to return from the new function.
+ * @returns {Function} Returns the new constant function.
+ * @example
+ *
+ * var objects = _.times(2, _.constant({ 'a': 1 }));
+ *
+ * console.log(objects);
+ * // => [{ 'a': 1 }, { 'a': 1 }]
+ *
+ * console.log(objects[0] === objects[1]);
+ * // => true
+ */
+function constant(value) {
+  return function() {
+    return value;
+  };
+}
+
+module.exports = constant;
+
+},{}],29:[function(require,module,exports){
+/**
+ * This method returns the first argument it receives.
+ *
+ * @static
+ * @since 0.1.0
+ * @memberOf _
+ * @category Util
+ * @param {*} value Any value.
+ * @returns {*} Returns `value`.
+ * @example
+ *
+ * var object = { 'a': 1 };
+ *
+ * console.log(_.identity(object) === object);
+ * // => true
+ */
+function identity(value) {
+  return value;
+}
+
+module.exports = identity;
+
+},{}],30:[function(require,module,exports){
 var isArrayLikeObject = require('./isArrayLikeObject');
 
 /** `Object#toString` result references. */
@@ -2270,7 +1894,7 @@ function isArguments(value) {
 
 module.exports = isArguments;
 
-},{"./isArrayLikeObject":31}],29:[function(require,module,exports){
+},{"./isArrayLikeObject":33}],31:[function(require,module,exports){
 /**
  * Checks if `value` is classified as an `Array` object.
  *
@@ -2298,7 +1922,7 @@ var isArray = Array.isArray;
 
 module.exports = isArray;
 
-},{}],30:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 var isFunction = require('./isFunction'),
     isLength = require('./isLength');
 
@@ -2333,7 +1957,7 @@ function isArrayLike(value) {
 
 module.exports = isArrayLike;
 
-},{"./isFunction":32,"./isLength":33}],31:[function(require,module,exports){
+},{"./isFunction":34,"./isLength":35}],33:[function(require,module,exports){
 var isArrayLike = require('./isArrayLike'),
     isObjectLike = require('./isObjectLike');
 
@@ -2368,7 +1992,7 @@ function isArrayLikeObject(value) {
 
 module.exports = isArrayLikeObject;
 
-},{"./isArrayLike":30,"./isObjectLike":35}],32:[function(require,module,exports){
+},{"./isArrayLike":32,"./isObjectLike":37}],34:[function(require,module,exports){
 var isObject = require('./isObject');
 
 /** `Object#toString` result references. */
@@ -2411,7 +2035,7 @@ function isFunction(value) {
 
 module.exports = isFunction;
 
-},{"./isObject":34}],33:[function(require,module,exports){
+},{"./isObject":36}],35:[function(require,module,exports){
 /** Used as references for various `Number` constants. */
 var MAX_SAFE_INTEGER = 9007199254740991;
 
@@ -2448,7 +2072,7 @@ function isLength(value) {
 
 module.exports = isLength;
 
-},{}],34:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 /**
  * Checks if `value` is the
  * [language type](http://www.ecma-international.org/ecma-262/7.0/#sec-ecmascript-language-types)
@@ -2476,12 +2100,12 @@ module.exports = isLength;
  */
 function isObject(value) {
   var type = typeof value;
-  return !!value && (type == 'object' || type == 'function');
+  return value != null && (type == 'object' || type == 'function');
 }
 
 module.exports = isObject;
 
-},{}],35:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 /**
  * Checks if `value` is object-like. A value is object-like if it's not `null`
  * and has a `typeof` result of "object".
@@ -2507,12 +2131,12 @@ module.exports = isObject;
  * // => false
  */
 function isObjectLike(value) {
-  return !!value && typeof value == 'object';
+  return value != null && typeof value == 'object';
 }
 
 module.exports = isObjectLike;
 
-},{}],36:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 var isObjectLike = require('./isObjectLike');
 
 /** `Object#toString` result references. */
@@ -2552,7 +2176,7 @@ function isSymbol(value) {
 
 module.exports = isSymbol;
 
-},{"./isObjectLike":35}],37:[function(require,module,exports){
+},{"./isObjectLike":37}],39:[function(require,module,exports){
 var arrayLikeKeys = require('./_arrayLikeKeys'),
     baseKeys = require('./_baseKeys'),
     isArrayLike = require('./isArrayLike');
@@ -2591,7 +2215,7 @@ function keys(object) {
 
 module.exports = keys;
 
-},{"./_arrayLikeKeys":20,"./_baseKeys":21,"./isArrayLike":30}],38:[function(require,module,exports){
+},{"./_arrayLikeKeys":7,"./_baseKeys":9,"./isArrayLike":32}],40:[function(require,module,exports){
 /**
  * This method returns `undefined`.
  *
@@ -2610,7 +2234,7 @@ function noop() {
 
 module.exports = noop;
 
-},{}],39:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 var baseRest = require('./_baseRest'),
     toInteger = require('./toInteger');
 
@@ -2652,7 +2276,7 @@ function rest(func, start) {
 
 module.exports = rest;
 
-},{"./_baseRest":22,"./toInteger":41}],40:[function(require,module,exports){
+},{"./_baseRest":10,"./toInteger":43}],42:[function(require,module,exports){
 var toNumber = require('./toNumber');
 
 /** Used as references for various `Number` constants. */
@@ -2696,7 +2320,7 @@ function toFinite(value) {
 
 module.exports = toFinite;
 
-},{"./toNumber":42}],41:[function(require,module,exports){
+},{"./toNumber":44}],43:[function(require,module,exports){
 var toFinite = require('./toFinite');
 
 /**
@@ -2734,7 +2358,7 @@ function toInteger(value) {
 
 module.exports = toInteger;
 
-},{"./toFinite":40}],42:[function(require,module,exports){
+},{"./toFinite":42}],44:[function(require,module,exports){
 var isObject = require('./isObject'),
     isSymbol = require('./isSymbol');
 
@@ -2802,7 +2426,7 @@ function toNumber(value) {
 
 module.exports = toNumber;
 
-},{"./isObject":34,"./isSymbol":36}],43:[function(require,module,exports){
+},{"./isObject":36,"./isSymbol":38}],45:[function(require,module,exports){
 'use strict';
 /* eslint-disable no-unused-vars */
 var hasOwnProperty = Object.prototype.hasOwnProperty;
@@ -2887,7 +2511,7 @@ module.exports = shouldUseNative() ? Object.assign : function (target, source) {
 	return to;
 };
 
-},{}],44:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -3115,7 +2739,7 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require('_process'))
-},{"_process":193}],45:[function(require,module,exports){
+},{"_process":195}],47:[function(require,module,exports){
 var EMPTY_ARRAY_BUFFER = new ArrayBuffer(0);
 
 /**
@@ -3234,7 +2858,7 @@ Buffer.prototype.destroy = function(){
 
 module.exports = Buffer;
 
-},{}],46:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 
 var Texture = require('./GLTexture');
 
@@ -3463,7 +3087,7 @@ Framebuffer.createFloat32 = function(gl, width, height, data)
 
 module.exports = Framebuffer;
 
-},{"./GLTexture":48}],47:[function(require,module,exports){
+},{"./GLTexture":50}],49:[function(require,module,exports){
 
 var compileProgram = require('./shader/compileProgram'),
 	extractAttributes = require('./shader/extractAttributes'),
@@ -3541,7 +3165,7 @@ Shader.prototype.destroy = function()
 
 module.exports = Shader;
 
-},{"./shader/compileProgram":53,"./shader/extractAttributes":55,"./shader/extractUniforms":56,"./shader/generateUniformAccessObject":57}],48:[function(require,module,exports){
+},{"./shader/compileProgram":55,"./shader/extractAttributes":57,"./shader/extractUniforms":58,"./shader/generateUniformAccessObject":59}],50:[function(require,module,exports){
 
 /**
  * Helper class to create a WebGL Texture
@@ -3853,7 +3477,7 @@ Texture.fromData = function(gl, data, width, height)
 
 module.exports = Texture;
 
-},{}],49:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 
 // state object//
 var setVertexAttribArrays = require( './setVertexAttribArrays' );
@@ -4102,7 +3726,7 @@ VertexArrayObject.prototype.destroy = function()
     this.nativeVao = null;
 };
 
-},{"./setVertexAttribArrays":52}],50:[function(require,module,exports){
+},{"./setVertexAttribArrays":54}],52:[function(require,module,exports){
 
 /**
  * Helper class to create a webGL Context
@@ -4130,7 +3754,7 @@ var createContext = function(canvas, options)
 
 module.exports = createContext;
 
-},{}],51:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
 var gl = {
     createContext:          require('./createContext'),
     setVertexAttribArrays:  require('./setVertexAttribArrays'),
@@ -4155,7 +3779,7 @@ if (typeof window !== 'undefined')
     // add the window object
     window.pixi = { gl: gl };
 }
-},{"./GLBuffer":45,"./GLFramebuffer":46,"./GLShader":47,"./GLTexture":48,"./VertexArrayObject":49,"./createContext":50,"./setVertexAttribArrays":52,"./shader":58}],52:[function(require,module,exports){
+},{"./GLBuffer":47,"./GLFramebuffer":48,"./GLShader":49,"./GLTexture":50,"./VertexArrayObject":51,"./createContext":52,"./setVertexAttribArrays":54,"./shader":60}],54:[function(require,module,exports){
 // var GL_MAP = {};
 
 /**
@@ -4212,7 +3836,7 @@ var setVertexAttribArrays = function (gl, attribs, state)
 
 module.exports = setVertexAttribArrays;
 
-},{}],53:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 
 /**
  * @class
@@ -4282,7 +3906,7 @@ var compileShader = function (gl, type, src)
 
 module.exports = compileProgram;
 
-},{}],54:[function(require,module,exports){
+},{}],56:[function(require,module,exports){
 /**
  * @class
  * @memberof pixi.gl.shader
@@ -4362,7 +3986,7 @@ var booleanArray = function(size)
 
 module.exports = defaultValue;
 
-},{}],55:[function(require,module,exports){
+},{}],57:[function(require,module,exports){
 
 var mapType = require('./mapType');
 var mapSize = require('./mapSize');
@@ -4405,7 +4029,7 @@ var pointer = function(type, normalized, stride, start){
 
 module.exports = extractAttributes;
 
-},{"./mapSize":59,"./mapType":60}],56:[function(require,module,exports){
+},{"./mapSize":61,"./mapType":62}],58:[function(require,module,exports){
 var mapType = require('./mapType');
 var defaultValue = require('./defaultValue');
 
@@ -4442,7 +4066,7 @@ var extractUniforms = function(gl, program)
 
 module.exports = extractUniforms;
 
-},{"./defaultValue":54,"./mapType":60}],57:[function(require,module,exports){
+},{"./defaultValue":56,"./mapType":62}],59:[function(require,module,exports){
 /**
  * Extracts the attributes
  * @class
@@ -4584,7 +4208,7 @@ var GLSL_TO_ARRAY_SETTERS = {
 
 module.exports = generateUniformAccessObject;
 
-},{}],58:[function(require,module,exports){
+},{}],60:[function(require,module,exports){
 module.exports = {
     compileProgram: require('./compileProgram'),
     defaultValue: require('./defaultValue'),
@@ -4594,7 +4218,7 @@ module.exports = {
     mapSize: require('./mapSize'),
     mapType: require('./mapType')  
 };
-},{"./compileProgram":53,"./defaultValue":54,"./extractAttributes":55,"./extractUniforms":56,"./generateUniformAccessObject":57,"./mapSize":59,"./mapType":60}],59:[function(require,module,exports){
+},{"./compileProgram":55,"./defaultValue":56,"./extractAttributes":57,"./extractUniforms":58,"./generateUniformAccessObject":59,"./mapSize":61,"./mapType":62}],61:[function(require,module,exports){
 /**
  * @class
  * @memberof pixi.gl.shader
@@ -4632,7 +4256,7 @@ var GLSL_TO_SIZE = {
 
 module.exports = mapSize;
 
-},{}],60:[function(require,module,exports){
+},{}],62:[function(require,module,exports){
 
 
 var mapSize = function(gl, type) 
@@ -4680,7 +4304,7 @@ var GL_TO_GLSL_TYPES = {
 
 module.exports = mapSize;
 
-},{}],61:[function(require,module,exports){
+},{}],63:[function(require,module,exports){
 var core = require('../core');
 var  Device = require('ismobilejs');
 
@@ -5137,7 +4761,7 @@ AccessibilityManager.prototype.destroy = function ()
 core.WebGLRenderer.registerPlugin('accessibility', AccessibilityManager);
 core.CanvasRenderer.registerPlugin('accessibility', AccessibilityManager);
 
-},{"../core":84,"./accessibleTarget":62,"ismobilejs":17}],62:[function(require,module,exports){
+},{"../core":86,"./accessibleTarget":64,"ismobilejs":4}],64:[function(require,module,exports){
 /**
  * Default property values of accessible objects
  * used by {@link PIXI.accessibility.AccessibilityManager}.
@@ -5196,7 +4820,7 @@ var accessibleTarget = {
 
 module.exports = accessibleTarget;
 
-},{}],63:[function(require,module,exports){
+},{}],65:[function(require,module,exports){
 /**
  * @file        Main export of the PIXI accessibility library
  * @author      Mat Groves <mat@goodboydigital.com>
@@ -5212,7 +4836,7 @@ module.exports = {
     AccessibilityManager: require('./AccessibilityManager')
 };
 
-},{"./AccessibilityManager":61,"./accessibleTarget":62}],64:[function(require,module,exports){
+},{"./AccessibilityManager":63,"./accessibleTarget":64}],66:[function(require,module,exports){
 var GLShader = require('pixi-gl-core').GLShader;
 var Const = require('./const');
 
@@ -5249,7 +4873,7 @@ Shader.prototype = Object.create(GLShader.prototype);
 Shader.prototype.constructor = Shader;
 module.exports = Shader;
 
-},{"./const":65,"pixi-gl-core":51}],65:[function(require,module,exports){
+},{"./const":67,"pixi-gl-core":53}],67:[function(require,module,exports){
 
 /**
  * Constant values used in pixi
@@ -5619,7 +5243,7 @@ var CONST = {
 
 module.exports = CONST;
 
-},{"./utils/maxRecommendedTextures":139}],66:[function(require,module,exports){
+},{"./utils/maxRecommendedTextures":141}],68:[function(require,module,exports){
 var math = require('../math'),
     Rectangle = math.Rectangle;
 
@@ -5844,7 +5468,7 @@ Bounds.prototype.addBounds = function(bounds)
     this.maxY = bounds.maxY > maxY ? bounds.maxY : maxY;
 };
 
-},{"../math":89}],67:[function(require,module,exports){
+},{"../math":91}],69:[function(require,module,exports){
 var utils = require('../utils'),
     DisplayObject = require('./DisplayObject');
 
@@ -6436,7 +6060,7 @@ Container.prototype.destroy = function (options)
     }
 };
 
-},{"../utils":138,"./DisplayObject":68}],68:[function(require,module,exports){
+},{"../utils":140,"./DisplayObject":70}],70:[function(require,module,exports){
 var EventEmitter = require('eventemitter3'),
     CONST = require('../const'),
     TransformStatic = require('./TransformStatic'),
@@ -7044,7 +6668,7 @@ DisplayObject.prototype.destroy = function ()
     this.interactiveChildren = false;
 };
 
-},{"../const":65,"../math":89,"./Bounds":66,"./Transform":69,"./TransformStatic":71,"eventemitter3":16}],69:[function(require,module,exports){
+},{"../const":67,"../math":91,"./Bounds":68,"./Transform":71,"./TransformStatic":73,"eventemitter3":3}],71:[function(require,module,exports){
 var math = require('../math'),
     TransformBase = require('./TransformBase');
 
@@ -7201,7 +6825,7 @@ Object.defineProperties(Transform.prototype, {
 
 module.exports = Transform;
 
-},{"../math":89,"./TransformBase":70}],70:[function(require,module,exports){
+},{"../math":91,"./TransformBase":72}],72:[function(require,module,exports){
 var math = require('../math');
 
 
@@ -7271,7 +6895,7 @@ TransformBase.IDENTITY = new TransformBase();
 
 module.exports = TransformBase;
 
-},{"../math":89}],71:[function(require,module,exports){
+},{"../math":91}],73:[function(require,module,exports){
 var math = require('../math'),
     TransformBase = require('./TransformBase');
 
@@ -7456,7 +7080,7 @@ Object.defineProperties(TransformStatic.prototype, {
 
 module.exports = TransformStatic;
 
-},{"../math":89,"./TransformBase":70}],72:[function(require,module,exports){
+},{"../math":91,"./TransformBase":72}],74:[function(require,module,exports){
 var Container = require('../display/Container'),
     RenderTexture = require('../textures/RenderTexture'),
     Texture = require('../textures/Texture'),
@@ -8512,7 +8136,7 @@ Graphics.prototype.destroy = function ()
     this._localBounds = null;
 };
 
-},{"../const":65,"../display/Bounds":66,"../display/Container":67,"../math":89,"../renderers/canvas/CanvasRenderer":96,"../sprites/Sprite":120,"../textures/RenderTexture":130,"../textures/Texture":131,"../utils":138,"./GraphicsData":73,"./utils/bezierCurveTo":75}],73:[function(require,module,exports){
+},{"../const":67,"../display/Bounds":68,"../display/Container":69,"../math":91,"../renderers/canvas/CanvasRenderer":98,"../sprites/Sprite":122,"../textures/RenderTexture":132,"../textures/Texture":133,"../utils":140,"./GraphicsData":75,"./utils/bezierCurveTo":77}],75:[function(require,module,exports){
 /**
  * A GraphicsData object.
  *
@@ -8619,7 +8243,7 @@ GraphicsData.prototype.destroy = function () {
     this.holes = null;
 };
 
-},{}],74:[function(require,module,exports){
+},{}],76:[function(require,module,exports){
 var CanvasRenderer = require('../../renderers/canvas/CanvasRenderer'),
     CONST = require('../../const');
 
@@ -8897,7 +8521,7 @@ CanvasGraphicsRenderer.prototype.destroy = function ()
   this.renderer = null;
 };
 
-},{"../../const":65,"../../renderers/canvas/CanvasRenderer":96}],75:[function(require,module,exports){
+},{"../../const":67,"../../renderers/canvas/CanvasRenderer":98}],77:[function(require,module,exports){
 
 /**
  * Calculate the points for a bezier curve and then draws it.
@@ -8951,7 +8575,7 @@ var bezierCurveTo = function (fromX, fromY, cpX, cpY, cpX2, cpY2, toX, toY, path
 
 module.exports = bezierCurveTo;
 
-},{}],76:[function(require,module,exports){
+},{}],78:[function(require,module,exports){
 var utils = require('../../utils'),
     CONST = require('../../const'),
     ObjectRenderer = require('../../renderers/webgl/utils/ObjectRenderer'),
@@ -9176,7 +8800,7 @@ GraphicsRenderer.prototype.getWebGLData = function (webGL, type)
     return webGLData;
 };
 
-},{"../../const":65,"../../renderers/webgl/WebGLRenderer":103,"../../renderers/webgl/utils/ObjectRenderer":113,"../../utils":138,"./WebGLGraphicsData":77,"./shaders/PrimitiveShader":78,"./utils/buildCircle":79,"./utils/buildPoly":81,"./utils/buildRectangle":82,"./utils/buildRoundedRectangle":83}],77:[function(require,module,exports){
+},{"../../const":67,"../../renderers/webgl/WebGLRenderer":105,"../../renderers/webgl/utils/ObjectRenderer":115,"../../utils":140,"./WebGLGraphicsData":79,"./shaders/PrimitiveShader":80,"./utils/buildCircle":81,"./utils/buildPoly":83,"./utils/buildRectangle":84,"./utils/buildRoundedRectangle":85}],79:[function(require,module,exports){
 var glCore = require('pixi-gl-core');
 
 
@@ -9303,7 +8927,7 @@ WebGLGraphicsData.prototype.destroy = function ()
     this.glIndices = null;
 };
 
-},{"pixi-gl-core":51}],78:[function(require,module,exports){
+},{"pixi-gl-core":53}],80:[function(require,module,exports){
 var Shader = require('../../../Shader');
 
 /**
@@ -9352,7 +8976,7 @@ PrimitiveShader.prototype.constructor = PrimitiveShader;
 
 module.exports = PrimitiveShader;
 
-},{"../../../Shader":64}],79:[function(require,module,exports){
+},{"../../../Shader":66}],81:[function(require,module,exports){
 var buildLine = require('./buildLine'),
     CONST = require('../../../const'),
     utils = require('../../../utils');
@@ -9444,7 +9068,7 @@ var buildCircle = function (graphicsData, webGLData)
 
 module.exports = buildCircle;
 
-},{"../../../const":65,"../../../utils":138,"./buildLine":80}],80:[function(require,module,exports){
+},{"../../../const":67,"../../../utils":140,"./buildLine":82}],82:[function(require,module,exports){
 var math = require('../../../math'),
     utils = require('../../../utils');
 
@@ -9668,7 +9292,7 @@ var buildLine = function (graphicsData, webGLData)
 
 module.exports = buildLine;
 
-},{"../../../math":89,"../../../utils":138}],81:[function(require,module,exports){
+},{"../../../math":91,"../../../utils":140}],83:[function(require,module,exports){
 var buildLine = require('./buildLine'),
     utils = require('../../../utils'),
     earcut = require('earcut');
@@ -9749,7 +9373,7 @@ var buildPoly = function (graphicsData, webGLData)
 
 module.exports = buildPoly;
 
-},{"../../../utils":138,"./buildLine":80,"earcut":15}],82:[function(require,module,exports){
+},{"../../../utils":140,"./buildLine":82,"earcut":2}],84:[function(require,module,exports){
 var buildLine = require('./buildLine'),
     utils = require('../../../utils');
 
@@ -9824,7 +9448,7 @@ var buildRectangle = function (graphicsData, webGLData)
 
 module.exports = buildRectangle;
 
-},{"../../../utils":138,"./buildLine":80}],83:[function(require,module,exports){
+},{"../../../utils":140,"./buildLine":82}],85:[function(require,module,exports){
 var earcut = require('earcut'),
     buildLine = require('./buildLine'),
     utils = require('../../../utils');
@@ -9960,7 +9584,7 @@ var quadraticBezierCurve = function (fromX, fromY, cpX, cpY, toX, toY, out)// js
 
 module.exports = buildRoundedRectangle;
 
-},{"../../../utils":138,"./buildLine":80,"earcut":15}],84:[function(require,module,exports){
+},{"../../../utils":140,"./buildLine":82,"earcut":2}],86:[function(require,module,exports){
 /**
  * @file        Main export of the PIXI core library
  * @author      Mat Groves <mat@goodboydigital.com>
@@ -10058,7 +9682,7 @@ var core = module.exports = Object.assign(require('./const'), require('./math'),
     }
 });
 
-},{"./Shader":64,"./const":65,"./display/Container":67,"./display/DisplayObject":68,"./display/Transform":69,"./display/TransformBase":70,"./display/TransformStatic":71,"./graphics/Graphics":72,"./graphics/GraphicsData":73,"./graphics/canvas/CanvasGraphicsRenderer":74,"./graphics/webgl/GraphicsRenderer":76,"./math":89,"./renderers/canvas/CanvasRenderer":96,"./renderers/canvas/utils/CanvasRenderTarget":98,"./renderers/webgl/WebGLRenderer":103,"./renderers/webgl/filters/Filter":105,"./renderers/webgl/filters/spriteMask/SpriteMaskFilter":108,"./renderers/webgl/managers/WebGLManager":112,"./renderers/webgl/utils/ObjectRenderer":113,"./renderers/webgl/utils/Quad":114,"./renderers/webgl/utils/RenderTarget":115,"./sprites/Sprite":120,"./sprites/canvas/CanvasSpriteRenderer":121,"./sprites/canvas/CanvasTinter":122,"./sprites/webgl/SpriteRenderer":124,"./text/Text":126,"./text/TextStyle":127,"./textures/BaseRenderTexture":128,"./textures/BaseTexture":129,"./textures/RenderTexture":130,"./textures/Texture":131,"./textures/TextureUvs":132,"./textures/VideoBaseTexture":133,"./ticker":135,"./utils":138,"pixi-gl-core":51}],85:[function(require,module,exports){
+},{"./Shader":66,"./const":67,"./display/Container":69,"./display/DisplayObject":70,"./display/Transform":71,"./display/TransformBase":72,"./display/TransformStatic":73,"./graphics/Graphics":74,"./graphics/GraphicsData":75,"./graphics/canvas/CanvasGraphicsRenderer":76,"./graphics/webgl/GraphicsRenderer":78,"./math":91,"./renderers/canvas/CanvasRenderer":98,"./renderers/canvas/utils/CanvasRenderTarget":100,"./renderers/webgl/WebGLRenderer":105,"./renderers/webgl/filters/Filter":107,"./renderers/webgl/filters/spriteMask/SpriteMaskFilter":110,"./renderers/webgl/managers/WebGLManager":114,"./renderers/webgl/utils/ObjectRenderer":115,"./renderers/webgl/utils/Quad":116,"./renderers/webgl/utils/RenderTarget":117,"./sprites/Sprite":122,"./sprites/canvas/CanvasSpriteRenderer":123,"./sprites/canvas/CanvasTinter":124,"./sprites/webgl/SpriteRenderer":126,"./text/Text":128,"./text/TextStyle":129,"./textures/BaseRenderTexture":130,"./textures/BaseTexture":131,"./textures/RenderTexture":132,"./textures/Texture":133,"./textures/TextureUvs":134,"./textures/VideoBaseTexture":135,"./ticker":137,"./utils":140,"pixi-gl-core":53}],87:[function(require,module,exports){
 // Your friendly neighbour https://en.wikipedia.org/wiki/Dihedral_group of order 16
 
 var ux = [1, 1, 0, -1, -1, -1, 0, 1, 1, 1, 0, -1, -1, -1, 0, 1];
@@ -10222,7 +9846,7 @@ var GroupD8 = {
 
 module.exports = GroupD8;
 
-},{"./Matrix":86}],86:[function(require,module,exports){
+},{"./Matrix":88}],88:[function(require,module,exports){
 // @todo - ignore the too many parameters warning for now
 // should either fix it or change the jshint config
 // jshint -W072
@@ -10712,7 +10336,7 @@ Matrix.IDENTITY = new Matrix();
  */
 Matrix.TEMP_MATRIX = new Matrix();
 
-},{"./Point":88}],87:[function(require,module,exports){
+},{"./Point":90}],89:[function(require,module,exports){
 /**
  * The Point object represents a location in a two-dimensional coordinate system, where x represents
  * the horizontal axis and y represents the vertical axis.
@@ -10814,7 +10438,7 @@ ObservablePoint.prototype.copy = function (point)
     }
 };
 
-},{}],88:[function(require,module,exports){
+},{}],90:[function(require,module,exports){
 /**
  * The Point object represents a location in a two-dimensional coordinate system, where x represents
  * the horizontal axis and y represents the vertical axis.
@@ -10884,7 +10508,7 @@ Point.prototype.set = function (x, y)
     this.y = y || ( (y !== 0) ? this.x : 0 ) ;
 };
 
-},{}],89:[function(require,module,exports){
+},{}],91:[function(require,module,exports){
 /**
  * Math classes and utilities mixed into PIXI namespace.
  *
@@ -10908,7 +10532,7 @@ module.exports = {
     RoundedRectangle:   require('./shapes/RoundedRectangle')
 };
 
-},{"./GroupD8":85,"./Matrix":86,"./ObservablePoint":87,"./Point":88,"./shapes/Circle":90,"./shapes/Ellipse":91,"./shapes/Polygon":92,"./shapes/Rectangle":93,"./shapes/RoundedRectangle":94}],90:[function(require,module,exports){
+},{"./GroupD8":87,"./Matrix":88,"./ObservablePoint":89,"./Point":90,"./shapes/Circle":92,"./shapes/Ellipse":93,"./shapes/Polygon":94,"./shapes/Rectangle":95,"./shapes/RoundedRectangle":96}],92:[function(require,module,exports){
 var Rectangle = require('./Rectangle'),
     CONST = require('../../const');
 
@@ -10999,7 +10623,7 @@ Circle.prototype.getBounds = function ()
     return new Rectangle(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
 };
 
-},{"../../const":65,"./Rectangle":93}],91:[function(require,module,exports){
+},{"../../const":67,"./Rectangle":95}],93:[function(require,module,exports){
 var Rectangle = require('./Rectangle'),
     CONST = require('../../const');
 
@@ -11097,7 +10721,7 @@ Ellipse.prototype.getBounds = function ()
     return new Rectangle(this.x - this.width, this.y - this.height, this.width, this.height);
 };
 
-},{"../../const":65,"./Rectangle":93}],92:[function(require,module,exports){
+},{"../../const":67,"./Rectangle":95}],94:[function(require,module,exports){
 var Point = require('../Point'),
     CONST = require('../../const');
 
@@ -11215,7 +10839,7 @@ Polygon.prototype.contains = function (x, y)
     return inside;
 };
 
-},{"../../const":65,"../Point":88}],93:[function(require,module,exports){
+},{"../../const":67,"../Point":90}],95:[function(require,module,exports){
 var CONST = require('../../const');
 
 /**
@@ -11390,7 +11014,7 @@ Rectangle.prototype.enlarge = function (rect)
     this.height = y2 - y1;
 };
 
-},{"../../const":65}],94:[function(require,module,exports){
+},{"../../const":67}],96:[function(require,module,exports){
 var CONST = require('../../const');
 
 /**
@@ -11485,7 +11109,7 @@ RoundedRectangle.prototype.contains = function (x, y)
     return false;
 };
 
-},{"../../const":65}],95:[function(require,module,exports){
+},{"../../const":67}],97:[function(require,module,exports){
 var utils = require('../utils'),
     math = require('../math'),
     CONST = require('../const'),
@@ -11775,7 +11399,7 @@ SystemRenderer.prototype.destroy = function (removeView) {
     this._lastObjectRendered = null;
 };
 
-},{"../const":65,"../display/Container":67,"../math":89,"../textures/RenderTexture":130,"../utils":138,"eventemitter3":16}],96:[function(require,module,exports){
+},{"../const":67,"../display/Container":69,"../math":91,"../textures/RenderTexture":132,"../utils":140,"eventemitter3":3}],98:[function(require,module,exports){
 var SystemRenderer = require('../SystemRenderer'),
     CanvasMaskManager = require('./utils/CanvasMaskManager'),
     CanvasRenderTarget = require('./utils/CanvasRenderTarget'),
@@ -12040,7 +11664,7 @@ CanvasRenderer.prototype.resize = function (width, height)
 
 };
 
-},{"../../const":65,"../../utils":138,"../SystemRenderer":95,"./utils/CanvasMaskManager":97,"./utils/CanvasRenderTarget":98,"./utils/mapCanvasBlendModesToPixi":100}],97:[function(require,module,exports){
+},{"../../const":67,"../../utils":140,"../SystemRenderer":97,"./utils/CanvasMaskManager":99,"./utils/CanvasRenderTarget":100,"./utils/mapCanvasBlendModesToPixi":102}],99:[function(require,module,exports){
 var CONST = require('../../../const');
 /**
  * A set of functions used to handle masking.
@@ -12202,7 +11826,7 @@ CanvasMaskManager.prototype.popMask = function (renderer)
 
 CanvasMaskManager.prototype.destroy = function () {};
 
-},{"../../../const":65}],98:[function(require,module,exports){
+},{"../../../const":67}],100:[function(require,module,exports){
 var CONST = require('../../../const');
 
 /**
@@ -12307,7 +11931,7 @@ CanvasRenderTarget.prototype.destroy = function ()
     this.canvas = null;
 };
 
-},{"../../../const":65}],99:[function(require,module,exports){
+},{"../../../const":67}],101:[function(require,module,exports){
 
 
 /**
@@ -12366,7 +11990,7 @@ var canUseNewCanvasBlendModes = function ()
 
 module.exports = canUseNewCanvasBlendModes;
 
-},{}],100:[function(require,module,exports){
+},{}],102:[function(require,module,exports){
 var CONST = require('../../../const'),
 canUseNewCanvasBlendModes = require('./canUseNewCanvasBlendModes');
 
@@ -12427,7 +12051,7 @@ function mapCanvasBlendModesToPixi(array)
 
 module.exports = mapCanvasBlendModesToPixi;
 
-},{"../../../const":65,"./canUseNewCanvasBlendModes":99}],101:[function(require,module,exports){
+},{"../../../const":67,"./canUseNewCanvasBlendModes":101}],103:[function(require,module,exports){
 
 var CONST = require('../../const');
 
@@ -12538,7 +12162,7 @@ TextureGarbageCollector.prototype.unload = function( displayObject )
     }
 };
 
-},{"../../const":65}],102:[function(require,module,exports){
+},{"../../const":67}],104:[function(require,module,exports){
 var GLTexture = require('pixi-gl-core').GLTexture,
     CONST = require('../../const'),
     RenderTarget = require('./utils/RenderTarget'),
@@ -12745,7 +12369,7 @@ TextureManager.prototype.destroy = function()
 
 module.exports = TextureManager;
 
-},{"../../const":65,"../../utils":138,"./utils/RenderTarget":115,"pixi-gl-core":51}],103:[function(require,module,exports){
+},{"../../const":67,"../../utils":140,"./utils/RenderTarget":117,"pixi-gl-core":53}],105:[function(require,module,exports){
 var SystemRenderer = require('../SystemRenderer'),
     MaskManager = require('./managers/MaskManager'),
     StencilManager = require('./managers/StencilManager'),
@@ -13309,7 +12933,7 @@ WebGLRenderer.prototype.destroy = function (removeView)
     // this = null;
 };
 
-},{"../../const":65,"../../utils":138,"../SystemRenderer":95,"./TextureGarbageCollector":101,"./TextureManager":102,"./WebGLState":104,"./managers/FilterManager":109,"./managers/MaskManager":110,"./managers/StencilManager":111,"./utils/ObjectRenderer":113,"./utils/RenderTarget":115,"./utils/mapWebGLDrawModesToPixi":118,"./utils/validateContext":119,"pixi-gl-core":51}],104:[function(require,module,exports){
+},{"../../const":67,"../../utils":140,"../SystemRenderer":97,"./TextureGarbageCollector":103,"./TextureManager":104,"./WebGLState":106,"./managers/FilterManager":111,"./managers/MaskManager":112,"./managers/StencilManager":113,"./utils/ObjectRenderer":115,"./utils/RenderTarget":117,"./utils/mapWebGLDrawModesToPixi":120,"./utils/validateContext":121,"pixi-gl-core":53}],106:[function(require,module,exports){
 var mapWebGLBlendModesToPixi = require('./utils/mapWebGLBlendModesToPixi');
 
 /**
@@ -13592,7 +13216,7 @@ WebGLState.prototype.resetToDefault = function()
 
 module.exports = WebGLState;
 
-},{"./utils/mapWebGLBlendModesToPixi":117}],105:[function(require,module,exports){
+},{"./utils/mapWebGLBlendModesToPixi":119}],107:[function(require,module,exports){
 var extractUniformsFromSrc = require('./extractUniformsFromSrc'),
     utils = require('../../../utils'),
     CONST = require('../../../const'),
@@ -13739,7 +13363,7 @@ Filter.defaultFragmentSrc = [
     '}'
 ].join('\n');
 
-},{"../../../const":65,"../../../utils":138,"./extractUniformsFromSrc":106}],106:[function(require,module,exports){
+},{"../../../const":67,"../../../utils":140,"./extractUniformsFromSrc":108}],108:[function(require,module,exports){
 var defaultValue = require('pixi-gl-core').shader.defaultValue;
 
 function extractUniformsFromSrc(vertexSrc, fragmentSrc, mask)
@@ -13801,7 +13425,7 @@ function extractUniformsFromString(string)
 
 module.exports = extractUniformsFromSrc;
 
-},{"pixi-gl-core":51}],107:[function(require,module,exports){
+},{"pixi-gl-core":53}],109:[function(require,module,exports){
 var math = require('../../../math');
 
 /*
@@ -13886,7 +13510,7 @@ module.exports = {
     calculateSpriteMatrix:calculateSpriteMatrix
 };
 
-},{"../../../math":89}],108:[function(require,module,exports){
+},{"../../../math":91}],110:[function(require,module,exports){
 var Filter = require('../Filter'),
     math =  require('../../../../math');
 
@@ -13937,7 +13561,7 @@ SpriteMaskFilter.prototype.apply = function (filterManager, input, output)
     filterManager.applyFilter(this, input, output);
 };
 
-},{"../../../../math":89,"../Filter":105}],109:[function(require,module,exports){
+},{"../../../../math":91,"../Filter":107}],111:[function(require,module,exports){
 
 var WebGLManager = require('./WebGLManager'),
     RenderTarget = require('../utils/RenderTarget'),
@@ -14378,7 +14002,7 @@ FilterManager.prototype.freePotRenderTarget = function(renderTarget)
     this.pool[key].push(renderTarget);
 };
 
-},{"../../../Shader":64,"../../../math":89,"../filters/filterTransforms":107,"../utils/Quad":114,"../utils/RenderTarget":115,"./WebGLManager":112,"bit-twiddle":14}],110:[function(require,module,exports){
+},{"../../../Shader":66,"../../../math":91,"../filters/filterTransforms":109,"../utils/Quad":116,"../utils/RenderTarget":117,"./WebGLManager":114,"bit-twiddle":1}],112:[function(require,module,exports){
 var WebGLManager = require('./WebGLManager'),
     AlphaMaskFilter = require('../filters/spriteMask/SpriteMaskFilter');
 
@@ -14573,7 +14197,7 @@ MaskManager.prototype.popScissorMask = function ()
     gl.disable(gl.SCISSOR_TEST);
 };
 
-},{"../filters/spriteMask/SpriteMaskFilter":108,"./WebGLManager":112}],111:[function(require,module,exports){
+},{"../filters/spriteMask/SpriteMaskFilter":110,"./WebGLManager":114}],113:[function(require,module,exports){
 var WebGLManager = require('./WebGLManager');
 
 /**
@@ -14686,7 +14310,7 @@ StencilManager.prototype.destroy = function ()
     this.stencilMaskStack.stencilStack = null;
 };
 
-},{"./WebGLManager":112}],112:[function(require,module,exports){
+},{"./WebGLManager":114}],114:[function(require,module,exports){
 /**
  * @class
  * @memberof PIXI
@@ -14727,7 +14351,7 @@ WebGLManager.prototype.destroy = function ()
     this.renderer = null;
 };
 
-},{}],113:[function(require,module,exports){
+},{}],115:[function(require,module,exports){
 var WebGLManager = require('../managers/WebGLManager');
 
 /**
@@ -14785,7 +14409,7 @@ ObjectRenderer.prototype.render = function (object) // jshint unused:false
     // render the object
 };
 
-},{"../managers/WebGLManager":112}],114:[function(require,module,exports){
+},{"../managers/WebGLManager":114}],116:[function(require,module,exports){
 var glCore = require('pixi-gl-core'),
     createIndicesForQuads = require('../../../utils/createIndicesForQuads');
 
@@ -14958,7 +14582,7 @@ Quad.prototype.destroy = function()
 
 module.exports = Quad;
 
-},{"../../../utils/createIndicesForQuads":136,"pixi-gl-core":51}],115:[function(require,module,exports){
+},{"../../../utils/createIndicesForQuads":138,"pixi-gl-core":53}],117:[function(require,module,exports){
 var math = require('../../../math'),
     CONST = require('../../../const'),
     GLFramebuffer = require('pixi-gl-core').GLFramebuffer;
@@ -15278,7 +14902,7 @@ RenderTarget.prototype.destroy = function ()
     this.texture = null;
 };
 
-},{"../../../const":65,"../../../math":89,"pixi-gl-core":51}],116:[function(require,module,exports){
+},{"../../../const":67,"../../../math":91,"pixi-gl-core":53}],118:[function(require,module,exports){
 var glCore = require('pixi-gl-core');
 
 var fragTemplate = [
@@ -15359,7 +14983,7 @@ function generateIfTestSrc(maxIfs)
 
 module.exports = checkMaxIfStatmentsInShader;
 
-},{"pixi-gl-core":51}],117:[function(require,module,exports){
+},{"pixi-gl-core":53}],119:[function(require,module,exports){
 var CONST = require('../../../const');
 
 /**
@@ -15398,7 +15022,7 @@ function mapWebGLBlendModesToPixi(gl, array)
 
 module.exports = mapWebGLBlendModesToPixi;
 
-},{"../../../const":65}],118:[function(require,module,exports){
+},{"../../../const":67}],120:[function(require,module,exports){
 var CONST = require('../../../const');
 
 /**
@@ -15424,7 +15048,7 @@ function mapWebGLDrawModesToPixi(gl, object)
 
 module.exports = mapWebGLDrawModesToPixi;
 
-},{"../../../const":65}],119:[function(require,module,exports){
+},{"../../../const":67}],121:[function(require,module,exports){
 
 
 function validateContext(gl)
@@ -15440,7 +15064,7 @@ function validateContext(gl)
 
 module.exports = validateContext;
 
-},{}],120:[function(require,module,exports){
+},{}],122:[function(require,module,exports){
 var math = require('../math'),
     Texture = require('../textures/Texture'),
     Container = require('../display/Container'),
@@ -15966,7 +15590,7 @@ Sprite.fromImage = function (imageId, crossorigin, scaleMode)
     return new Sprite(Texture.fromImage(imageId, crossorigin, scaleMode));
 };
 
-},{"../const":65,"../display/Container":67,"../math":89,"../textures/Texture":131,"../utils":138}],121:[function(require,module,exports){
+},{"../const":67,"../display/Container":69,"../math":91,"../textures/Texture":133,"../utils":140}],123:[function(require,module,exports){
 var CanvasRenderer = require('../../renderers/canvas/CanvasRenderer'),
     CONST = require('../../const'),
     math = require('../../math'),
@@ -16132,7 +15756,7 @@ CanvasSpriteRenderer.prototype.destroy = function (){
   this.renderer = null;
 };
 
-},{"../../const":65,"../../math":89,"../../renderers/canvas/CanvasRenderer":96,"./CanvasTinter":122}],122:[function(require,module,exports){
+},{"../../const":67,"../../math":91,"../../renderers/canvas/CanvasRenderer":98,"./CanvasTinter":124}],124:[function(require,module,exports){
 var utils = require('../../utils'),
     canUseNewCanvasBlendModes = require('../../renderers/canvas/utils/canUseNewCanvasBlendModes');
 
@@ -16402,7 +16026,7 @@ CanvasTinter.tintMethod = CanvasTinter.canUseMultiply ? CanvasTinter.tintWithMul
  * @param canvas {HTMLCanvasElement} the current canvas
  */
 
-},{"../../renderers/canvas/utils/canUseNewCanvasBlendModes":99,"../../utils":138}],123:[function(require,module,exports){
+},{"../../renderers/canvas/utils/canUseNewCanvasBlendModes":101,"../../utils":140}],125:[function(require,module,exports){
 
 
  var Buffer = function(size)
@@ -16433,7 +16057,7 @@ CanvasTinter.tintMethod = CanvasTinter.canUseMultiply ? CanvasTinter.tintWithMul
    this.uvs = null;
    this.colors  = null;
  };
-},{}],124:[function(require,module,exports){
+},{}],126:[function(require,module,exports){
 var ObjectRenderer = require('../../renderers/webgl/utils/ObjectRenderer'),
     WebGLRenderer = require('../../renderers/webgl/WebGLRenderer'),
     createIndicesForQuads = require('../../utils/createIndicesForQuads'),
@@ -16856,7 +16480,7 @@ SpriteRenderer.prototype.destroy = function ()
 
 };
 
-},{"../../const":65,"../../renderers/webgl/WebGLRenderer":103,"../../renderers/webgl/utils/ObjectRenderer":113,"../../renderers/webgl/utils/checkMaxIfStatmentsInShader":116,"../../utils/createIndicesForQuads":136,"./BatchBuffer":123,"./generateMultiTextureShader":125,"bit-twiddle":14,"pixi-gl-core":51}],125:[function(require,module,exports){
+},{"../../const":67,"../../renderers/webgl/WebGLRenderer":105,"../../renderers/webgl/utils/ObjectRenderer":115,"../../renderers/webgl/utils/checkMaxIfStatmentsInShader":118,"../../utils/createIndicesForQuads":138,"./BatchBuffer":125,"./generateMultiTextureShader":127,"bit-twiddle":1,"pixi-gl-core":53}],127:[function(require,module,exports){
 var Shader = require('../../Shader');
 
 
@@ -16930,7 +16554,7 @@ function generateSampleSrc(maxTextures)
 
 module.exports = generateMultiTextureShader;
 
-},{"../../Shader":64}],126:[function(require,module,exports){
+},{"../../Shader":66}],128:[function(require,module,exports){
 var Sprite = require('../sprites/Sprite'),
     Texture = require('../textures/Texture'),
     math = require('../math'),
@@ -17704,7 +17328,7 @@ Text.prototype.destroy = function (options)
     this._style = null;
 };
 
-},{"../const":65,"../math":89,"../sprites/Sprite":120,"../textures/Texture":131,"../utils":138,"./TextStyle":127}],127:[function(require,module,exports){
+},{"../const":67,"../math":91,"../sprites/Sprite":122,"../textures/Texture":133,"../utils":140,"./TextStyle":129}],129:[function(require,module,exports){
 var CONST = require('../const'),
     utils = require('../utils');
 
@@ -18198,7 +17822,7 @@ function getColor(color)
     return color;
 }
 
-},{"../const":65,"../utils":138}],128:[function(require,module,exports){
+},{"../const":67,"../utils":140}],130:[function(require,module,exports){
 var BaseTexture = require('./BaseTexture'),
     CONST = require('../const');
 
@@ -18331,7 +17955,7 @@ BaseRenderTexture.prototype.destroy = function ()
 };
 
 
-},{"../const":65,"./BaseTexture":129}],129:[function(require,module,exports){
+},{"../const":67,"./BaseTexture":131}],131:[function(require,module,exports){
 var utils = require('../utils'),
     CONST = require('../const'),
     EventEmitter = require('eventemitter3'),
@@ -18781,7 +18405,7 @@ BaseTexture.fromCanvas = function (canvas, scaleMode)
     return baseTexture;
 };
 
-},{"../const":65,"../utils":138,"../utils/determineCrossOrigin":137,"bit-twiddle":14,"eventemitter3":16}],130:[function(require,module,exports){
+},{"../const":67,"../utils":140,"../utils/determineCrossOrigin":139,"bit-twiddle":1,"eventemitter3":3}],132:[function(require,module,exports){
 var BaseRenderTexture = require('./BaseRenderTexture'),
     Texture = require('./Texture');
 
@@ -18905,7 +18529,7 @@ RenderTexture.create = function(width, height, scaleMode, resolution)
     return new RenderTexture(new BaseRenderTexture(width, height, scaleMode, resolution));
 };
 
-},{"./BaseRenderTexture":128,"./Texture":131}],131:[function(require,module,exports){
+},{"./BaseRenderTexture":130,"./Texture":133}],133:[function(require,module,exports){
 var BaseTexture = require('./BaseTexture'),
     VideoBaseTexture = require('./VideoBaseTexture'),
     TextureUvs = require('./TextureUvs'),
@@ -19429,7 +19053,7 @@ Texture.EMPTY.once = function() {};
 Texture.EMPTY.emit = function() {};
 
 
-},{"../math":89,"../utils":138,"./BaseTexture":129,"./TextureUvs":132,"./VideoBaseTexture":133,"eventemitter3":16}],132:[function(require,module,exports){
+},{"../math":91,"../utils":140,"./BaseTexture":131,"./TextureUvs":134,"./VideoBaseTexture":135,"eventemitter3":3}],134:[function(require,module,exports){
 
 /**
  * A standard object to store the Uvs of a texture
@@ -19514,7 +19138,7 @@ TextureUvs.prototype.set = function (frame, baseFrame, rotate)
     this.uvsUint32[3] = (((this.y3 * 65535) & 0xFFFF) << 16) | ((this.x3 * 65535) & 0xFFFF);
 };
 
-},{"../math/GroupD8":85}],133:[function(require,module,exports){
+},{"../math/GroupD8":87}],135:[function(require,module,exports){
 var BaseTexture = require('./BaseTexture'),
     utils = require('../utils');
 
@@ -19757,7 +19381,7 @@ function createSource(path, type)
     return source;
 }
 
-},{"../utils":138,"./BaseTexture":129}],134:[function(require,module,exports){
+},{"../utils":140,"./BaseTexture":131}],136:[function(require,module,exports){
 var CONST = require('../const'),
     EventEmitter = require('eventemitter3'),
     // Internal event used by composed emitter
@@ -20133,7 +19757,7 @@ Ticker.prototype.update = function update(currentTime)
 
 module.exports = Ticker;
 
-},{"../const":65,"eventemitter3":16}],135:[function(require,module,exports){
+},{"../const":67,"eventemitter3":3}],137:[function(require,module,exports){
 var Ticker = require('./Ticker');
 
 /**
@@ -20189,7 +19813,7 @@ module.exports = {
     Ticker: Ticker
 };
 
-},{"./Ticker":134}],136:[function(require,module,exports){
+},{"./Ticker":136}],138:[function(require,module,exports){
 /**
  * Generic Mask Stack data structure
  * @class
@@ -20221,7 +19845,7 @@ var createIndicesForQuads = function (size)
 
 module.exports = createIndicesForQuads;
 
-},{}],137:[function(require,module,exports){
+},{}],139:[function(require,module,exports){
 var tempAnchor;
 var _url = require('url');
 
@@ -20266,7 +19890,7 @@ var determineCrossOrigin = function (url, loc) {
 
 module.exports = determineCrossOrigin;
 
-},{"url":204}],138:[function(require,module,exports){
+},{"url":219}],140:[function(require,module,exports){
 var CONST = require('../const');
 
 /**
@@ -20494,7 +20118,7 @@ var utils = module.exports = {
     BaseTextureCache: {}
 };
 
-},{"../const":65,"./pluginTarget":140,"eventemitter3":16}],139:[function(require,module,exports){
+},{"../const":67,"./pluginTarget":142,"eventemitter3":3}],141:[function(require,module,exports){
 
 
 var  Device = require('ismobilejs');
@@ -20515,7 +20139,7 @@ var maxRecommendedTextures = function(max)
 };
 
 module.exports = maxRecommendedTextures;
-},{"ismobilejs":17}],140:[function(require,module,exports){
+},{"ismobilejs":4}],142:[function(require,module,exports){
 /**
  * Mixins functionality to make an object have "plugins".
  *
@@ -20585,7 +20209,7 @@ module.exports = {
     }
 };
 
-},{}],141:[function(require,module,exports){
+},{}],143:[function(require,module,exports){
 /*global console */
 var core = require('./core'),
     mesh = require('./mesh'),
@@ -21208,7 +20832,7 @@ core.utils.canUseNewCanvasBlendModes = function() {
     // @endif
     return core.CanvasTinter.canUseMultiply;
 };
-},{"./core":84,"./extras":151,"./filters":162,"./mesh":179,"./particles":182}],142:[function(require,module,exports){
+},{"./core":86,"./extras":153,"./filters":164,"./mesh":181,"./particles":184}],144:[function(require,module,exports){
 var core = require('../../core'),
     tempRect = new core.Rectangle();
 
@@ -21360,13 +20984,13 @@ CanvasExtract.prototype.destroy = function ()
 
 core.CanvasRenderer.registerPlugin('extract', CanvasExtract);
 
-},{"../../core":84}],143:[function(require,module,exports){
+},{"../../core":86}],145:[function(require,module,exports){
 
 module.exports = {
     webGL: require('./webgl/WebGLExtract'),
     canvas: require('./canvas/CanvasExtract')
 };
-},{"./canvas/CanvasExtract":142,"./webgl/WebGLExtract":144}],144:[function(require,module,exports){
+},{"./canvas/CanvasExtract":144,"./webgl/WebGLExtract":146}],146:[function(require,module,exports){
 var core = require('../../core'),
     tempRect = new core.Rectangle();
 
@@ -21563,7 +21187,7 @@ WebGLExtract.prototype.destroy = function ()
 
 core.WebGLRenderer.registerPlugin('extract', WebGLExtract);
 
-},{"../../core":84}],145:[function(require,module,exports){
+},{"../../core":86}],147:[function(require,module,exports){
 var core = require('../core'),
     ObservablePoint = require('../core/math/ObservablePoint');
 
@@ -22001,7 +21625,7 @@ BitmapText.prototype.makeDirty = function() {
 
 BitmapText.fonts = {};
 
-},{"../core":84,"../core/math/ObservablePoint":87}],146:[function(require,module,exports){
+},{"../core":86,"../core/math/ObservablePoint":89}],148:[function(require,module,exports){
 var core = require('../core');
 
 /**
@@ -22330,7 +21954,7 @@ MovieClip.fromImages = function (images)
     return new MovieClip(textures);
 };
 
-},{"../core":84}],147:[function(require,module,exports){
+},{"../core":86}],149:[function(require,module,exports){
 var core = require('../core'),
     tempPoint = new core.Point(),
     Texture = require('../core/textures/Texture'),
@@ -22788,7 +22412,7 @@ TilingSprite.fromImage = function (imageId, width, height, crossorigin, scaleMod
     return new TilingSprite(core.Texture.fromImage(imageId, crossorigin, scaleMode),width,height);
 };
 
-},{"../core":84,"../core/sprites/canvas/CanvasTinter":122,"../core/textures/Texture":131,"./webgl/TilingShader":152}],148:[function(require,module,exports){
+},{"../core":86,"../core/sprites/canvas/CanvasTinter":124,"../core/textures/Texture":133,"./webgl/TilingShader":154}],150:[function(require,module,exports){
 var core = require('../core'),
     DisplayObject = core.DisplayObject,
     _tempMatrix = new core.Matrix();
@@ -23127,7 +22751,7 @@ DisplayObject.prototype._cacheAsBitmapDestroy = function ()
     this.destroy();
 };
 
-},{"../core":84}],149:[function(require,module,exports){
+},{"../core":86}],151:[function(require,module,exports){
 var core = require('../core');
 
 /**
@@ -23157,7 +22781,7 @@ core.Container.prototype.getChildByName = function (name)
     return null;
 };
 
-},{"../core":84}],150:[function(require,module,exports){
+},{"../core":86}],152:[function(require,module,exports){
 var core = require('../core');
 
 /**
@@ -23187,7 +22811,7 @@ core.DisplayObject.prototype.getGlobalPosition = function (point)
     return point;
 };
 
-},{"../core":84}],151:[function(require,module,exports){
+},{"../core":86}],153:[function(require,module,exports){
 /**
  * @file        Main export of the PIXI extras library
  * @author      Mat Groves <mat@goodboydigital.com>
@@ -23208,7 +22832,7 @@ module.exports = {
     BitmapText:     require('./BitmapText')
 };
 
-},{"./BitmapText":145,"./MovieClip":146,"./TilingSprite":147,"./cacheAsBitmap":148,"./getChildByName":149,"./getGlobalPosition":150}],152:[function(require,module,exports){
+},{"./BitmapText":147,"./MovieClip":148,"./TilingSprite":149,"./cacheAsBitmap":150,"./getChildByName":151,"./getGlobalPosition":152}],154:[function(require,module,exports){
 var Shader = require('../../core/Shader');
 
 
@@ -23232,7 +22856,7 @@ TilingShader.prototype.constructor = TilingShader;
 module.exports = TilingShader;
 
 
-},{"../../core/Shader":64}],153:[function(require,module,exports){
+},{"../../core/Shader":66}],155:[function(require,module,exports){
 var core = require('../../core'),
     BlurXFilter = require('./BlurXFilter'),
     BlurYFilter = require('./BlurYFilter');
@@ -23352,7 +22976,7 @@ Object.defineProperties(BlurFilter.prototype, {
     }
 });
 
-},{"../../core":84,"./BlurXFilter":154,"./BlurYFilter":155}],154:[function(require,module,exports){
+},{"../../core":86,"./BlurXFilter":156,"./BlurYFilter":157}],156:[function(require,module,exports){
 var core = require('../../core');
 var generateBlurVertSource  = require('./generateBlurVertSource');
 var generateBlurFragSource  = require('./generateBlurFragSource');
@@ -23477,7 +23101,7 @@ Object.defineProperties(BlurXFilter.prototype, {
     }
 });
 
-},{"../../core":84,"./generateBlurFragSource":156,"./generateBlurVertSource":157,"./getMaxBlurKernelSize":158}],155:[function(require,module,exports){
+},{"../../core":86,"./generateBlurFragSource":158,"./generateBlurVertSource":159,"./getMaxBlurKernelSize":160}],157:[function(require,module,exports){
 var core = require('../../core');
 var generateBlurVertSource  = require('./generateBlurVertSource');
 var generateBlurFragSource  = require('./generateBlurFragSource');
@@ -23600,7 +23224,7 @@ Object.defineProperties(BlurYFilter.prototype, {
     }
 });
 
-},{"../../core":84,"./generateBlurFragSource":156,"./generateBlurVertSource":157,"./getMaxBlurKernelSize":158}],156:[function(require,module,exports){
+},{"../../core":86,"./generateBlurFragSource":158,"./generateBlurVertSource":159,"./getMaxBlurKernelSize":160}],158:[function(require,module,exports){
 var GAUSSIAN_VALUES = {
 	5:[0.153388, 0.221461, 0.250301],
 	7:[0.071303, 0.131514, 0.189879, 0.214607],
@@ -23662,7 +23286,7 @@ var generateFragBlurSource = function(kernelSize)
 
 module.exports = generateFragBlurSource;
 
-},{}],157:[function(require,module,exports){
+},{}],159:[function(require,module,exports){
 
 var vertTemplate = [
 	'attribute vec2 aVertexPosition;',
@@ -23728,7 +23352,7 @@ var generateVertBlurSource = function(kernelSize, x)
 
 module.exports = generateVertBlurSource;
 
-},{}],158:[function(require,module,exports){
+},{}],160:[function(require,module,exports){
 
 
 var getMaxKernelSize = function(gl)
@@ -23746,7 +23370,7 @@ var getMaxKernelSize = function(gl)
 
 module.exports = getMaxKernelSize;
 
-},{}],159:[function(require,module,exports){
+},{}],161:[function(require,module,exports){
 var core = require('../../core');
 // @see https://github.com/substack/brfs/issues/25
 
@@ -24303,7 +23927,7 @@ Object.defineProperties(ColorMatrixFilter.prototype, {
     }
 });
 
-},{"../../core":84}],160:[function(require,module,exports){
+},{"../../core":86}],162:[function(require,module,exports){
 var core = require('../../core');
 
 
@@ -24384,7 +24008,7 @@ Object.defineProperties(DisplacementFilter.prototype, {
     }
 });
 
-},{"../../core":84}],161:[function(require,module,exports){
+},{"../../core":86}],163:[function(require,module,exports){
 var core = require('../../core');
 
 
@@ -24419,7 +24043,7 @@ FXAAFilter.prototype.constructor = FXAAFilter;
 
 module.exports = FXAAFilter;
 
-},{"../../core":84}],162:[function(require,module,exports){
+},{"../../core":86}],164:[function(require,module,exports){
 /**
  * @file        Main export of the PIXI filters library
  * @author      Mat Groves <mat@goodboydigital.com>
@@ -24441,7 +24065,7 @@ module.exports = {
     VoidFilter:         require('./void/VoidFilter')
 };
 
-},{"./blur/BlurFilter":153,"./blur/BlurXFilter":154,"./blur/BlurYFilter":155,"./colormatrix/ColorMatrixFilter":159,"./displacement/DisplacementFilter":160,"./fxaa/FXAAFilter":161,"./noise/NoiseFilter":163,"./void/VoidFilter":164}],163:[function(require,module,exports){
+},{"./blur/BlurFilter":155,"./blur/BlurXFilter":156,"./blur/BlurYFilter":157,"./colormatrix/ColorMatrixFilter":161,"./displacement/DisplacementFilter":162,"./fxaa/FXAAFilter":163,"./noise/NoiseFilter":165,"./void/VoidFilter":166}],165:[function(require,module,exports){
 var core = require('../../core');
 
 
@@ -24493,7 +24117,7 @@ Object.defineProperties(NoiseFilter.prototype, {
     }
 });
 
-},{"../../core":84}],164:[function(require,module,exports){
+},{"../../core":86}],166:[function(require,module,exports){
 var core = require('../../core');
 // @see https://github.com/substack/brfs/issues/25
 
@@ -24521,7 +24145,7 @@ VoidFilter.prototype = Object.create(core.Filter.prototype);
 VoidFilter.prototype.constructor = VoidFilter;
 module.exports = VoidFilter;
 
-},{"../../core":84}],165:[function(require,module,exports){
+},{"../../core":86}],167:[function(require,module,exports){
 (function (global){
 // run the polyfills
 require('./polyfill');
@@ -24556,7 +24180,7 @@ Object.assign(core, require('./deprecation'));
 global.PIXI = core;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./accessibility":63,"./core":84,"./deprecation":141,"./extract":143,"./extras":151,"./filters":162,"./interaction":168,"./loaders":171,"./mesh":179,"./particles":182,"./polyfill":188,"./prepare":191}],166:[function(require,module,exports){
+},{"./accessibility":65,"./core":86,"./deprecation":143,"./extract":145,"./extras":153,"./filters":164,"./interaction":170,"./loaders":173,"./mesh":181,"./particles":184,"./polyfill":190,"./prepare":193}],168:[function(require,module,exports){
 var core = require('../core');
 
 /**
@@ -24605,7 +24229,7 @@ InteractionData.prototype.getLocalPosition = function (displayObject, point, glo
     return displayObject.worldTransform.applyInverse(globalPos || this.global, point);
 };
 
-},{"../core":84}],167:[function(require,module,exports){
+},{"../core":86}],169:[function(require,module,exports){
 var core = require('../core'),
     InteractionData = require('./InteractionData'),
     EventEmitter = require('eventemitter3');
@@ -25719,7 +25343,7 @@ InteractionManager.prototype.destroy = function () {
 core.WebGLRenderer.registerPlugin('interaction', InteractionManager);
 core.CanvasRenderer.registerPlugin('interaction', InteractionManager);
 
-},{"../core":84,"./InteractionData":166,"./interactiveTarget":169,"eventemitter3":16}],168:[function(require,module,exports){
+},{"../core":86,"./InteractionData":168,"./interactiveTarget":171,"eventemitter3":3}],170:[function(require,module,exports){
 /**
  * @file        Main export of the PIXI interactions library
  * @author      Mat Groves <mat@goodboydigital.com>
@@ -25736,7 +25360,7 @@ module.exports = {
     interactiveTarget:  require('./interactiveTarget')
 };
 
-},{"./InteractionData":166,"./InteractionManager":167,"./interactiveTarget":169}],169:[function(require,module,exports){
+},{"./InteractionData":168,"./InteractionManager":169,"./interactiveTarget":171}],171:[function(require,module,exports){
 /**
  * Default property values of interactive objects
  * Used by {@link PIXI.interaction.InteractionManager} to automatically give all DisplayObjects these properties
@@ -25826,7 +25450,7 @@ var interactiveTarget = {
 
 module.exports = interactiveTarget;
 
-},{}],170:[function(require,module,exports){
+},{}],172:[function(require,module,exports){
 var Resource = require('resource-loader').Resource,
     core = require('../core'),
     extras = require('../extras'),
@@ -25953,7 +25577,7 @@ module.exports = function ()
     };
 };
 
-},{"../core":84,"../extras":151,"path":44,"resource-loader":201}],171:[function(require,module,exports){
+},{"../core":86,"../extras":153,"path":46,"resource-loader":216}],173:[function(require,module,exports){
 /**
  * @file        Main export of the PIXI loaders library
  * @author      Mat Groves <mat@goodboydigital.com>
@@ -25974,7 +25598,7 @@ module.exports = {
     Resource:           require('resource-loader').Resource
 };
 
-},{"./bitmapFontParser":170,"./loader":172,"./spritesheetParser":173,"./textureParser":174,"resource-loader":201}],172:[function(require,module,exports){
+},{"./bitmapFontParser":172,"./loader":174,"./spritesheetParser":175,"./textureParser":176,"resource-loader":216}],174:[function(require,module,exports){
 var ResourceLoader = require('resource-loader'),
     textureParser = require('./textureParser'),
     spritesheetParser = require('./spritesheetParser'),
@@ -26037,7 +25661,7 @@ var Resource = ResourceLoader.Resource;
 
 Resource.setExtensionXhrType('fnt', Resource.XHR_RESPONSE_TYPE.DOCUMENT);
 
-},{"./bitmapFontParser":170,"./spritesheetParser":173,"./textureParser":174,"resource-loader":201}],173:[function(require,module,exports){
+},{"./bitmapFontParser":172,"./spritesheetParser":175,"./textureParser":176,"resource-loader":216}],175:[function(require,module,exports){
 var Resource = require('resource-loader').Resource,
     path = require('path'),
     core = require('../core');
@@ -26163,7 +25787,7 @@ module.exports = function ()
     };
 };
 
-},{"../core":84,"path":44,"resource-loader":201}],174:[function(require,module,exports){
+},{"../core":86,"path":46,"resource-loader":216}],176:[function(require,module,exports){
 var core = require('../core');
 
 module.exports = function ()
@@ -26185,7 +25809,7 @@ module.exports = function ()
     };
 };
 
-},{"../core":84}],175:[function(require,module,exports){
+},{"../core":86}],177:[function(require,module,exports){
 var core = require('../core'),
     glCore = require('pixi-gl-core'),
     Shader = require('./webgl/MeshShader'),
@@ -26688,7 +26312,7 @@ Mesh.DRAW_MODES = {
     TRIANGLES: 1
 };
 
-},{"../core":84,"./webgl/MeshShader":180,"pixi-gl-core":51}],176:[function(require,module,exports){
+},{"../core":86,"./webgl/MeshShader":182,"pixi-gl-core":53}],178:[function(require,module,exports){
 var DEFAULT_BORDER_SIZE= 10;
 
 var Plane = require('./Plane');
@@ -27013,7 +26637,7 @@ NineSlicePlane.prototype.drawSegment= function (context, textureSource, w, h, x1
     context.drawImage(textureSource, uvs[x1] * w, uvs[y1] * h, sw, sh, vertices[x1], vertices[y1], dw, dh);
 };
 
-},{"./Plane":177}],177:[function(require,module,exports){
+},{"./Plane":179}],179:[function(require,module,exports){
 var Mesh = require('./Mesh');
 
 /**
@@ -27138,7 +26762,7 @@ Plane.prototype._onTextureUpdate = function ()
     }
 };
 
-},{"./Mesh":175}],178:[function(require,module,exports){
+},{"./Mesh":177}],180:[function(require,module,exports){
 var Mesh = require('./Mesh');
 var core = require('../core');
 
@@ -27353,7 +26977,7 @@ Rope.prototype.updateTransform = function ()
     this.containerUpdateTransform();
 };
 
-},{"../core":84,"./Mesh":175}],179:[function(require,module,exports){
+},{"../core":86,"./Mesh":177}],181:[function(require,module,exports){
 /**
  * @file        Main export of the PIXI extras library
  * @author      Mat Groves <mat@goodboydigital.com>
@@ -27372,7 +26996,7 @@ module.exports = {
     MeshShader:     require('./webgl/MeshShader')
 };
 
-},{"./Mesh":175,"./NineSlicePlane":176,"./Plane":177,"./Rope":178,"./webgl/MeshShader":180}],180:[function(require,module,exports){
+},{"./Mesh":177,"./NineSlicePlane":178,"./Plane":179,"./Rope":180,"./webgl/MeshShader":182}],182:[function(require,module,exports){
 var Shader = require('../../core/Shader');
 
 /**
@@ -27420,7 +27044,7 @@ MeshShader.prototype.constructor = MeshShader;
 module.exports = MeshShader;
 
 
-},{"../../core/Shader":64}],181:[function(require,module,exports){
+},{"../../core/Shader":66}],183:[function(require,module,exports){
 var core = require('../core');
 
 /**
@@ -27754,7 +27378,7 @@ ParticleContainer.prototype.destroy = function () {
     this._buffers = null;
 };
 
-},{"../core":84}],182:[function(require,module,exports){
+},{"../core":86}],184:[function(require,module,exports){
 /**
  * @file        Main export of the PIXI extras library
  * @author      Mat Groves <mat@goodboydigital.com>
@@ -27770,7 +27394,7 @@ module.exports = {
     ParticleRenderer: 			 require('./webgl/ParticleRenderer')
 };
 
-},{"./ParticleContainer":181,"./webgl/ParticleRenderer":184}],183:[function(require,module,exports){
+},{"./ParticleContainer":183,"./webgl/ParticleRenderer":186}],185:[function(require,module,exports){
 var glCore = require('pixi-gl-core'),
     createIndicesForQuads = require('../../core/utils/createIndicesForQuads');
 
@@ -28001,7 +27625,7 @@ ParticleBuffer.prototype.destroy = function ()
     this.staticBuffer.destroy();
 };
 
-},{"../../core/utils/createIndicesForQuads":136,"pixi-gl-core":51}],184:[function(require,module,exports){
+},{"../../core/utils/createIndicesForQuads":138,"pixi-gl-core":53}],186:[function(require,module,exports){
 var core = require('../../core'),
     ParticleShader = require('./ParticleShader'),
     ParticleBuffer = require('./ParticleBuffer');
@@ -28433,7 +28057,7 @@ ParticleRenderer.prototype.destroy = function ()
     this.tempMatrix = null;
 };
 
-},{"../../core":84,"./ParticleBuffer":183,"./ParticleShader":185}],185:[function(require,module,exports){
+},{"../../core":86,"./ParticleBuffer":185,"./ParticleShader":187}],187:[function(require,module,exports){
 var Shader = require('../../core/Shader');
 
 /**
@@ -28499,7 +28123,7 @@ ParticleShader.prototype.constructor = ParticleShader;
 
 module.exports = ParticleShader;
 
-},{"../../core/Shader":64}],186:[function(require,module,exports){
+},{"../../core/Shader":66}],188:[function(require,module,exports){
 // References:
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/sign
 
@@ -28515,7 +28139,7 @@ if (!Math.sign)
     };
 }
 
-},{}],187:[function(require,module,exports){
+},{}],189:[function(require,module,exports){
 // References:
 // https://github.com/sindresorhus/object-assign
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign
@@ -28525,7 +28149,7 @@ if (!Object.assign)
     Object.assign = require('object-assign');
 }
 
-},{"object-assign":43}],188:[function(require,module,exports){
+},{"object-assign":45}],190:[function(require,module,exports){
 require('./Object.assign');
 require('./requestAnimationFrame');
 require('./Math.sign');
@@ -28543,7 +28167,7 @@ if(!window.Uint16Array){
   window.Uint16Array = Array;
 }
 
-},{"./Math.sign":186,"./Object.assign":187,"./requestAnimationFrame":189}],189:[function(require,module,exports){
+},{"./Math.sign":188,"./Object.assign":189,"./requestAnimationFrame":191}],191:[function(require,module,exports){
 (function (global){
 // References:
 // http://paulirish.com/2011/requestanimationframe-for-smart-animating/
@@ -28613,7 +28237,7 @@ if (!global.cancelAnimationFrame) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],190:[function(require,module,exports){
+},{}],192:[function(require,module,exports){
 var core = require('../../core');
 
 /**
@@ -28673,13 +28297,13 @@ CanvasPrepare.prototype.destroy = function()
 };
 
 core.CanvasRenderer.registerPlugin('prepare', CanvasPrepare);
-},{"../../core":84}],191:[function(require,module,exports){
+},{"../../core":86}],193:[function(require,module,exports){
 
 module.exports = {
     webGL: require('./webgl/WebGLPrepare'),
     canvas: require('./canvas/CanvasPrepare')
 };
-},{"./canvas/CanvasPrepare":190,"./webgl/WebGLPrepare":192}],192:[function(require,module,exports){
+},{"./canvas/CanvasPrepare":192,"./webgl/WebGLPrepare":194}],194:[function(require,module,exports){
 var core = require('../../core'),
     SharedTicker = core.ticker.shared;
 
@@ -28983,7 +28607,7 @@ function findGraphics(item, queue)
 }
 
 core.WebGLRenderer.registerPlugin('prepare', WebGLPrepare);
-},{"../../core":84}],193:[function(require,module,exports){
+},{"../../core":86}],195:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -29165,7 +28789,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],194:[function(require,module,exports){
+},{}],196:[function(require,module,exports){
 (function (global){
 /*! https://mths.be/punycode v1.4.1 by @mathias */
 ;(function(root) {
@@ -29702,7 +29326,7 @@ process.umask = function() { return 0; };
 }(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],195:[function(require,module,exports){
+},{}],197:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -29788,7 +29412,7 @@ var isArray = Array.isArray || function (xs) {
   return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{}],196:[function(require,module,exports){
+},{}],198:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -29875,13 +29499,707 @@ var objectKeys = Object.keys || function (obj) {
   return res;
 };
 
-},{}],197:[function(require,module,exports){
+},{}],199:[function(require,module,exports){
 'use strict';
 
 exports.decode = exports.parse = require('./decode');
 exports.encode = exports.stringify = require('./encode');
 
-},{"./decode":195,"./encode":196}],198:[function(require,module,exports){
+},{"./decode":197,"./encode":198}],200:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = eachLimit;
+
+var _eachOfLimit = require('./internal/eachOfLimit');
+
+var _eachOfLimit2 = _interopRequireDefault(_eachOfLimit);
+
+var _withoutIndex = require('./internal/withoutIndex');
+
+var _withoutIndex2 = _interopRequireDefault(_withoutIndex);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * The same as [`each`]{@link module:Collections.each} but runs a maximum of `limit` async operations at a time.
+ *
+ * @name eachLimit
+ * @static
+ * @memberOf module:Collections
+ * @method
+ * @see [async.each]{@link module:Collections.each}
+ * @alias forEachLimit
+ * @category Collection
+ * @param {Array|Iterable|Object} coll - A colleciton to iterate over.
+ * @param {number} limit - The maximum number of async operations at a time.
+ * @param {Function} iteratee - A function to apply to each item in `coll`. The
+ * iteratee is passed a `callback(err)` which must be called once it has
+ * completed. If no error has occurred, the `callback` should be run without
+ * arguments or with an explicit `null` argument. The array index is not passed
+ * to the iteratee. Invoked with (item, callback). If you need the index, use
+ * `eachOfLimit`.
+ * @param {Function} [callback] - A callback which is called when all
+ * `iteratee` functions have finished, or an error occurs. Invoked with (err).
+ */
+function eachLimit(coll, limit, iteratee, callback) {
+  (0, _eachOfLimit2.default)(limit)(coll, (0, _withoutIndex2.default)(iteratee), callback);
+}
+module.exports = exports['default'];
+},{"./internal/eachOfLimit":204,"./internal/withoutIndex":211}],201:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _eachLimit = require('./eachLimit');
+
+var _eachLimit2 = _interopRequireDefault(_eachLimit);
+
+var _doLimit = require('./internal/doLimit');
+
+var _doLimit2 = _interopRequireDefault(_doLimit);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * The same as [`each`]{@link module:Collections.each} but runs only a single async operation at a time.
+ *
+ * @name eachSeries
+ * @static
+ * @memberOf module:Collections
+ * @method
+ * @see [async.each]{@link module:Collections.each}
+ * @alias forEachSeries
+ * @category Collection
+ * @param {Array|Iterable|Object} coll - A collection to iterate over.
+ * @param {Function} iteratee - A function to apply to each
+ * item in `coll`. The iteratee is passed a `callback(err)` which must be called
+ * once it has completed. If no error has occurred, the `callback` should be run
+ * without arguments or with an explicit `null` argument. The array index is
+ * not passed to the iteratee. Invoked with (item, callback). If you need the
+ * index, use `eachOfSeries`.
+ * @param {Function} [callback] - A callback which is called when all
+ * `iteratee` functions have finished, or an error occurs. Invoked with (err).
+ */
+exports.default = (0, _doLimit2.default)(_eachLimit2.default, 1);
+module.exports = exports['default'];
+},{"./eachLimit":200,"./internal/doLimit":203}],202:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.default = DLL;
+// Simple doubly linked list (https://en.wikipedia.org/wiki/Doubly_linked_list) implementation
+// used for queues. This implementation assumes that the node provided by the user can be modified
+// to adjust the next and last properties. We implement only the minimal functionality
+// for queue support.
+function DLL() {
+    this.head = this.tail = null;
+    this.length = 0;
+}
+
+function setInitial(dll, node) {
+    dll.length = 1;
+    dll.head = dll.tail = node;
+}
+
+DLL.prototype.removeLink = function (node) {
+    if (node.prev) node.prev.next = node.next;else this.head = node.next;
+    if (node.next) node.next.prev = node.prev;else this.tail = node.prev;
+
+    node.prev = node.next = null;
+    this.length -= 1;
+    return node;
+};
+
+DLL.prototype.empty = DLL;
+
+DLL.prototype.insertAfter = function (node, newNode) {
+    newNode.prev = node;
+    newNode.next = node.next;
+    if (node.next) node.next.prev = newNode;else this.tail = newNode;
+    node.next = newNode;
+    this.length += 1;
+};
+
+DLL.prototype.insertBefore = function (node, newNode) {
+    newNode.prev = node.prev;
+    newNode.next = node;
+    if (node.prev) node.prev.next = newNode;else this.head = newNode;
+    node.prev = newNode;
+    this.length += 1;
+};
+
+DLL.prototype.unshift = function (node) {
+    if (this.head) this.insertBefore(this.head, node);else setInitial(this, node);
+};
+
+DLL.prototype.push = function (node) {
+    if (this.tail) this.insertAfter(this.tail, node);else setInitial(this, node);
+};
+
+DLL.prototype.shift = function () {
+    return this.head && this.removeLink(this.head);
+};
+
+DLL.prototype.pop = function () {
+    return this.tail && this.removeLink(this.tail);
+};
+module.exports = exports['default'];
+},{}],203:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.default = doLimit;
+function doLimit(fn, limit) {
+    return function (iterable, iteratee, callback) {
+        return fn(iterable, limit, iteratee, callback);
+    };
+}
+module.exports = exports['default'];
+},{}],204:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.default = _eachOfLimit;
+
+var _noop = require('lodash/noop');
+
+var _noop2 = _interopRequireDefault(_noop);
+
+var _once = require('./once');
+
+var _once2 = _interopRequireDefault(_once);
+
+var _iterator = require('./iterator');
+
+var _iterator2 = _interopRequireDefault(_iterator);
+
+var _onlyOnce = require('./onlyOnce');
+
+var _onlyOnce2 = _interopRequireDefault(_onlyOnce);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _eachOfLimit(limit) {
+    return function (obj, iteratee, callback) {
+        callback = (0, _once2.default)(callback || _noop2.default);
+        if (limit <= 0 || !obj) {
+            return callback(null);
+        }
+        var nextElem = (0, _iterator2.default)(obj);
+        var done = false;
+        var running = 0;
+
+        function iterateeCallback(err) {
+            running -= 1;
+            if (err) {
+                done = true;
+                callback(err);
+            } else if (done && running <= 0) {
+                return callback(null);
+            } else {
+                replenish();
+            }
+        }
+
+        function replenish() {
+            while (running < limit && !done) {
+                var elem = nextElem();
+                if (elem === null) {
+                    done = true;
+                    if (running <= 0) {
+                        callback(null);
+                    }
+                    return;
+                }
+                running += 1;
+                iteratee(elem.value, elem.key, (0, _onlyOnce2.default)(iterateeCallback));
+            }
+        }
+
+        replenish();
+    };
+}
+module.exports = exports['default'];
+},{"./iterator":206,"./once":207,"./onlyOnce":208,"lodash/noop":40}],205:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+exports.default = function (coll) {
+    return iteratorSymbol && coll[iteratorSymbol] && coll[iteratorSymbol]();
+};
+
+var iteratorSymbol = typeof Symbol === 'function' && Symbol.iterator;
+
+module.exports = exports['default'];
+},{}],206:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.default = iterator;
+
+var _isArrayLike = require('lodash/isArrayLike');
+
+var _isArrayLike2 = _interopRequireDefault(_isArrayLike);
+
+var _getIterator = require('./getIterator');
+
+var _getIterator2 = _interopRequireDefault(_getIterator);
+
+var _keys = require('lodash/keys');
+
+var _keys2 = _interopRequireDefault(_keys);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function createArrayIterator(coll) {
+    var i = -1;
+    var len = coll.length;
+    return function next() {
+        return ++i < len ? { value: coll[i], key: i } : null;
+    };
+}
+
+function createES2015Iterator(iterator) {
+    var i = -1;
+    return function next() {
+        var item = iterator.next();
+        if (item.done) return null;
+        i++;
+        return { value: item.value, key: i };
+    };
+}
+
+function createObjectIterator(obj) {
+    var okeys = (0, _keys2.default)(obj);
+    var i = -1;
+    var len = okeys.length;
+    return function next() {
+        var key = okeys[++i];
+        return i < len ? { value: obj[key], key: key } : null;
+    };
+}
+
+function iterator(coll) {
+    if ((0, _isArrayLike2.default)(coll)) {
+        return createArrayIterator(coll);
+    }
+
+    var iterator = (0, _getIterator2.default)(coll);
+    return iterator ? createES2015Iterator(iterator) : createObjectIterator(coll);
+}
+module.exports = exports['default'];
+},{"./getIterator":205,"lodash/isArrayLike":32,"lodash/keys":39}],207:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.default = once;
+function once(fn) {
+    return function () {
+        if (fn === null) return;
+        var callFn = fn;
+        fn = null;
+        callFn.apply(this, arguments);
+    };
+}
+module.exports = exports['default'];
+},{}],208:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.default = onlyOnce;
+function onlyOnce(fn) {
+    return function () {
+        if (fn === null) throw new Error("Callback was already called.");
+        var callFn = fn;
+        fn = null;
+        callFn.apply(this, arguments);
+    };
+}
+module.exports = exports['default'];
+},{}],209:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.default = queue;
+
+var _arrayEach = require('lodash/_arrayEach');
+
+var _arrayEach2 = _interopRequireDefault(_arrayEach);
+
+var _isArray = require('lodash/isArray');
+
+var _isArray2 = _interopRequireDefault(_isArray);
+
+var _noop = require('lodash/noop');
+
+var _noop2 = _interopRequireDefault(_noop);
+
+var _rest = require('lodash/rest');
+
+var _rest2 = _interopRequireDefault(_rest);
+
+var _onlyOnce = require('./onlyOnce');
+
+var _onlyOnce2 = _interopRequireDefault(_onlyOnce);
+
+var _setImmediate = require('./setImmediate');
+
+var _setImmediate2 = _interopRequireDefault(_setImmediate);
+
+var _DoublyLinkedList = require('./DoublyLinkedList');
+
+var _DoublyLinkedList2 = _interopRequireDefault(_DoublyLinkedList);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function queue(worker, concurrency, payload) {
+    if (concurrency == null) {
+        concurrency = 1;
+    } else if (concurrency === 0) {
+        throw new Error('Concurrency must not be zero');
+    }
+
+    function _insert(data, insertAtFront, callback) {
+        if (callback != null && typeof callback !== 'function') {
+            throw new Error('task callback must be a function');
+        }
+        q.started = true;
+        if (!(0, _isArray2.default)(data)) {
+            data = [data];
+        }
+        if (data.length === 0 && q.idle()) {
+            // call drain immediately if there are no tasks
+            return (0, _setImmediate2.default)(function () {
+                q.drain();
+            });
+        }
+        (0, _arrayEach2.default)(data, function (task) {
+            var item = {
+                data: task,
+                callback: callback || _noop2.default
+            };
+
+            if (insertAtFront) {
+                q._tasks.unshift(item);
+            } else {
+                q._tasks.push(item);
+            }
+        });
+        (0, _setImmediate2.default)(q.process);
+    }
+
+    function _next(tasks) {
+        return (0, _rest2.default)(function (args) {
+            workers -= 1;
+
+            (0, _arrayEach2.default)(tasks, function (task) {
+                (0, _arrayEach2.default)(workersList, function (worker, index) {
+                    if (worker === task) {
+                        workersList.splice(index, 1);
+                        return false;
+                    }
+                });
+
+                task.callback.apply(task, args);
+
+                if (args[0] != null) {
+                    q.error(args[0], task.data);
+                }
+            });
+
+            if (workers <= q.concurrency - q.buffer) {
+                q.unsaturated();
+            }
+
+            if (q.idle()) {
+                q.drain();
+            }
+            q.process();
+        });
+    }
+
+    var workers = 0;
+    var workersList = [];
+    var q = {
+        _tasks: new _DoublyLinkedList2.default(),
+        concurrency: concurrency,
+        payload: payload,
+        saturated: _noop2.default,
+        unsaturated: _noop2.default,
+        buffer: concurrency / 4,
+        empty: _noop2.default,
+        drain: _noop2.default,
+        error: _noop2.default,
+        started: false,
+        paused: false,
+        push: function (data, callback) {
+            _insert(data, false, callback);
+        },
+        kill: function () {
+            q.drain = _noop2.default;
+            q._tasks.empty();
+        },
+        unshift: function (data, callback) {
+            _insert(data, true, callback);
+        },
+        process: function () {
+            while (!q.paused && workers < q.concurrency && q._tasks.length) {
+                var tasks = [],
+                    data = [];
+                var l = q._tasks.length;
+                if (q.payload) l = Math.min(l, q.payload);
+                for (var i = 0; i < l; i++) {
+                    var node = q._tasks.shift();
+                    tasks.push(node);
+                    data.push(node.data);
+                }
+
+                if (q._tasks.length === 0) {
+                    q.empty();
+                }
+                workers += 1;
+                workersList.push(tasks[0]);
+
+                if (workers === q.concurrency) {
+                    q.saturated();
+                }
+
+                var cb = (0, _onlyOnce2.default)(_next(tasks));
+                worker(data, cb);
+            }
+        },
+        length: function () {
+            return q._tasks.length;
+        },
+        running: function () {
+            return workers;
+        },
+        workersList: function () {
+            return workersList;
+        },
+        idle: function () {
+            return q._tasks.length + workers === 0;
+        },
+        pause: function () {
+            q.paused = true;
+        },
+        resume: function () {
+            if (q.paused === false) {
+                return;
+            }
+            q.paused = false;
+            var resumeCount = Math.min(q.concurrency, q._tasks.length);
+            // Need to call q.process once per concurrent
+            // worker to preserve full concurrency after pause
+            for (var w = 1; w <= resumeCount; w++) {
+                (0, _setImmediate2.default)(q.process);
+            }
+        }
+    };
+    return q;
+}
+module.exports = exports['default'];
+},{"./DoublyLinkedList":202,"./onlyOnce":208,"./setImmediate":210,"lodash/_arrayEach":6,"lodash/isArray":31,"lodash/noop":40,"lodash/rest":41}],210:[function(require,module,exports){
+(function (process){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.hasNextTick = exports.hasSetImmediate = undefined;
+exports.fallback = fallback;
+exports.wrap = wrap;
+
+var _rest = require('lodash/rest');
+
+var _rest2 = _interopRequireDefault(_rest);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var hasSetImmediate = exports.hasSetImmediate = typeof setImmediate === 'function' && setImmediate;
+var hasNextTick = exports.hasNextTick = typeof process === 'object' && typeof process.nextTick === 'function';
+
+function fallback(fn) {
+    setTimeout(fn, 0);
+}
+
+function wrap(defer) {
+    return (0, _rest2.default)(function (fn, args) {
+        defer(function () {
+            fn.apply(null, args);
+        });
+    });
+}
+
+var _defer;
+
+if (hasSetImmediate) {
+    _defer = setImmediate;
+} else if (hasNextTick) {
+    _defer = process.nextTick;
+} else {
+    _defer = fallback;
+}
+
+exports.default = wrap(_defer);
+}).call(this,require('_process'))
+},{"_process":195,"lodash/rest":41}],211:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.default = _withoutIndex;
+function _withoutIndex(iteratee) {
+    return function (value, index, callback) {
+        return iteratee(value, callback);
+    };
+}
+module.exports = exports['default'];
+},{}],212:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+exports.default = function (worker, concurrency) {
+  return (0, _queue2.default)(function (items, cb) {
+    worker(items[0], cb);
+  }, concurrency, 1);
+};
+
+var _queue = require('./internal/queue');
+
+var _queue2 = _interopRequireDefault(_queue);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+module.exports = exports['default'];
+
+/**
+ * A queue of tasks for the worker function to complete.
+ * @typedef {Object} QueueObject
+ * @memberOf module:ControlFlow
+ * @property {Function} length - a function returning the number of items
+ * waiting to be processed. Invoke with `queue.length()`.
+ * @property {boolean} started - a boolean indicating whether or not any
+ * items have been pushed and processed by the queue.
+ * @property {Function} running - a function returning the number of items
+ * currently being processed. Invoke with `queue.running()`.
+ * @property {Function} workersList - a function returning the array of items
+ * currently being processed. Invoke with `queue.workersList()`.
+ * @property {Function} idle - a function returning false if there are items
+ * waiting or being processed, or true if not. Invoke with `queue.idle()`.
+ * @property {number} concurrency - an integer for determining how many `worker`
+ * functions should be run in parallel. This property can be changed after a
+ * `queue` is created to alter the concurrency on-the-fly.
+ * @property {Function} push - add a new task to the `queue`. Calls `callback`
+ * once the `worker` has finished processing the task. Instead of a single task,
+ * a `tasks` array can be submitted. The respective callback is used for every
+ * task in the list. Invoke with `queue.push(task, [callback])`,
+ * @property {Function} unshift - add a new task to the front of the `queue`.
+ * Invoke with `queue.unshift(task, [callback])`.
+ * @property {Function} saturated - a callback that is called when the number of
+ * running workers hits the `concurrency` limit, and further tasks will be
+ * queued.
+ * @property {Function} unsaturated - a callback that is called when the number
+ * of running workers is less than the `concurrency` & `buffer` limits, and
+ * further tasks will not be queued.
+ * @property {number} buffer - A minimum threshold buffer in order to say that
+ * the `queue` is `unsaturated`.
+ * @property {Function} empty - a callback that is called when the last item
+ * from the `queue` is given to a `worker`.
+ * @property {Function} drain - a callback that is called when the last item
+ * from the `queue` has returned from the `worker`.
+ * @property {Function} error - a callback that is called when a task errors.
+ * Has the signature `function(error, task)`.
+ * @property {boolean} paused - a boolean for determining whether the queue is
+ * in a paused state.
+ * @property {Function} pause - a function that pauses the processing of tasks
+ * until `resume()` is called. Invoke with `queue.pause()`.
+ * @property {Function} resume - a function that resumes the processing of
+ * queued tasks when the queue is paused. Invoke with `queue.resume()`.
+ * @property {Function} kill - a function that removes the `drain` callback and
+ * empties remaining tasks from the queue forcing it to go idle. Invoke with `queue.kill()`.
+ */
+
+/**
+ * Creates a `queue` object with the specified `concurrency`. Tasks added to the
+ * `queue` are processed in parallel (up to the `concurrency` limit). If all
+ * `worker`s are in progress, the task is queued until one becomes available.
+ * Once a `worker` completes a `task`, that `task`'s callback is called.
+ *
+ * @name queue
+ * @static
+ * @memberOf module:ControlFlow
+ * @method
+ * @category Control Flow
+ * @param {Function} worker - An asynchronous function for processing a queued
+ * task, which must call its `callback(err)` argument when finished, with an
+ * optional `error` as an argument.  If you want to handle errors from an
+ * individual task, pass a callback to `q.push()`. Invoked with
+ * (task, callback).
+ * @param {number} [concurrency=1] - An `integer` for determining how many
+ * `worker` functions should be run in parallel.  If omitted, the concurrency
+ * defaults to `1`.  If the concurrency is `0`, an error is thrown.
+ * @returns {module:ControlFlow.QueueObject} A queue object to manage the tasks. Callbacks can
+ * attached as certain properties to listen for specific events during the
+ * lifecycle of the queue.
+ * @example
+ *
+ * // create a queue object with concurrency 2
+ * var q = async.queue(function(task, callback) {
+ *     console.log('hello ' + task.name);
+ *     callback();
+ * }, 2);
+ *
+ * // assign a callback
+ * q.drain = function() {
+ *     console.log('all items have been processed');
+ * };
+ *
+ * // add some items to the queue
+ * q.push({name: 'foo'}, function(err) {
+ *     console.log('finished processing foo');
+ * });
+ * q.push({name: 'bar'}, function (err) {
+ *     console.log('finished processing bar');
+ * });
+ *
+ * // add some items to the queue (batch-wise)
+ * q.push([{name: 'baz'},{name: 'bay'},{name: 'bax'}], function(err) {
+ *     console.log('finished processing item');
+ * });
+ *
+ * // add some items to the front of the queue
+ * q.unshift({name: 'bar'}, function (err) {
+ *     console.log('finished processing bar');
+ * });
+ */
+},{"./internal/queue":209}],213:[function(require,module,exports){
 'use strict';
 
 var asyncQueue      = require('async/queue');
@@ -30376,7 +30694,7 @@ Loader.prototype._onLoad = function (resource) {
 Loader.LOAD_TYPE = Resource.LOAD_TYPE;
 Loader.XHR_RESPONSE_TYPE = Resource.XHR_RESPONSE_TYPE;
 
-},{"./Resource":199,"async/eachSeries":2,"async/queue":13,"eventemitter3":16,"url":204}],199:[function(require,module,exports){
+},{"./Resource":214,"async/eachSeries":201,"async/queue":212,"eventemitter3":3,"url":219}],214:[function(require,module,exports){
 'use strict';
 
 var EventEmitter    = require('eventemitter3');
@@ -31289,7 +31607,7 @@ function setExtMap(map, extname, val) {
     map[extname] = val;
 }
 
-},{"eventemitter3":16,"url":204}],200:[function(require,module,exports){
+},{"eventemitter3":3,"url":219}],215:[function(require,module,exports){
 /* eslint no-magic-numbers: 0 */
 'use strict';
 
@@ -31359,7 +31677,7 @@ module.exports = {
     }
 };
 
-},{}],201:[function(require,module,exports){
+},{}],216:[function(require,module,exports){
 /* eslint global-require: 0 */
 'use strict';
 
@@ -31375,7 +31693,7 @@ module.exports.middleware = {
 };
 
 
-},{"./Loader":198,"./Resource":199,"./middlewares/caching/memory":202,"./middlewares/parsing/blob":203}],202:[function(require,module,exports){
+},{"./Loader":213,"./Resource":214,"./middlewares/caching/memory":217,"./middlewares/parsing/blob":218}],217:[function(require,module,exports){
 'use strict';
 
 // a simple in-memory cache for resources
@@ -31399,7 +31717,7 @@ module.exports = function () {
     };
 };
 
-},{}],203:[function(require,module,exports){
+},{}],218:[function(require,module,exports){
 'use strict';
 
 var Resource = require('../../Resource');
@@ -31468,7 +31786,7 @@ module.exports = function () {
     };
 };
 
-},{"../../Resource":199,"../../b64":200}],204:[function(require,module,exports){
+},{"../../Resource":214,"../../b64":215}],219:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -32177,7 +32495,7 @@ function isNullOrUndefined(arg) {
   return  arg == null;
 }
 
-},{"punycode":194,"querystring":197}],205:[function(require,module,exports){
+},{"punycode":196,"querystring":199}],220:[function(require,module,exports){
 (function (__filename){
   var global = (function(){ return this; }).call(null);  if(!global.require){    global.require = function require(key){        return global.require[key.replace(/\\/g, '/')];    };    (function(){    var require = global.require;    var ret = global.require;    Object.defineProperty(global, 'require', {        get: function(){          return ret;        },        set: function(newRequire){            ret = function(key){                key = key.replace(/\\/g, '/');                if(require[key]){                  return require[key];                }else if(require[key + '/index']){                  return require[key + '/index'];                }else{                  var temp = ret;                  var module;                  ret = newRequire;                  try {                    module = newRequire(key);                  }                  catch(e){                    ret = temp;                    throw e;                  }                  ret = temp;                  return module;                }            };            for(var key in require){              ret[key] = require[key];            }        }    });    })();  }'use strict';
 
@@ -32189,34 +32507,37 @@ var viewController = require('./js/viewController');
 ;  var global = (function(){ return this; }).call(null);  if(typeof __filename !== 'undefined'){    var moduleName = __filename.slice(0, __filename.lastIndexOf('.')).replace(/\\/g, '/');    global.require[moduleName] = module.exports;  }
 
 }).call(this,"/src/index.js")
-},{"./js/viewController":209}],206:[function(require,module,exports){
+},{"./js/viewController":224}],221:[function(require,module,exports){
 (function (__filename){
   var global = (function(){ return this; }).call(null);  if(!global.require){    global.require = function require(key){        return global.require[key.replace(/\\/g, '/')];    };    (function(){    var require = global.require;    var ret = global.require;    Object.defineProperty(global, 'require', {        get: function(){          return ret;        },        set: function(newRequire){            ret = function(key){                key = key.replace(/\\/g, '/');                if(require[key]){                  return require[key];                }else if(require[key + '/index']){                  return require[key + '/index'];                }else{                  var temp = ret;                  var module;                  ret = newRequire;                  try {                    module = newRequire(key);                  }                  catch(e){                    ret = temp;                    throw e;                  }                  ret = temp;                  return module;                }            };            for(var key in require){              ret[key] = require[key];            }        }    });    })();  };var global = (function(){ return this; }).call(null);global.require['pixi.js'] = require('pixi.js');'use strict';
 
 var PIXI = require('pixi.js');
 
-var stageSetup = function (GAME_CONFIG) {
+var setupRenderer = function (GAME_CONFIG) {
     var renderer = PIXI.autoDetectRenderer(GAME_CONFIG.constants.GAME_WIDTH, GAME_CONFIG.constants.GAME_HEIGHT, {antialias: false, transparent: false, resolution: 1});
     renderer.backgroundColor = 0x99ccff;
     // renderer = new PIXI.WebGLRenderer(GAME_CONFIG.GAME_WIDTH, GAME_CONFIG.GAME_WIDTH);
     // renderer = new PIXI.CanvasRenderer(GAME_CONFIG.GAME_WIDTH, GAME_CONFIG.GAME_WIDTH);
-    $(GAME_CONFIG.selectors.STAGE).html(renderer.view);
+    return renderer;
+};
+
+var setupStage = function (GAME_CONFIG) {
     var stage = new PIXI.Container();
-    var ground = new PIXI.Graphics();
-    stage.addChild(ground);
-    renderer.render(stage);
     return stage;
 };
 
 module.exports = {
-    init: function (GAME_CONFIG) {
-        return stageSetup(GAME_CONFIG);
+    setupRenderer: function (GAME_CONFIG) {
+        return setupRenderer(GAME_CONFIG);
+    },
+    setupStage: function (GAME_CONFIG) {
+        return setupStage(GAME_CONFIG);
     }
 };
 ;  var global = (function(){ return this; }).call(null);  if(typeof __filename !== 'undefined'){    var moduleName = __filename.slice(0, __filename.lastIndexOf('.')).replace(/\\/g, '/');    global.require[moduleName] = module.exports;  }
 
 }).call(this,"/src/js/stage/stageSetup.js")
-},{"pixi.js":165}],207:[function(require,module,exports){
+},{"pixi.js":167}],222:[function(require,module,exports){
 (function (__filename){
   var global = (function(){ return this; }).call(null);  if(!global.require){    global.require = function require(key){        return global.require[key.replace(/\\/g, '/')];    };    (function(){    var require = global.require;    var ret = global.require;    Object.defineProperty(global, 'require', {        get: function(){          return ret;        },        set: function(newRequire){            ret = function(key){                key = key.replace(/\\/g, '/');                if(require[key]){                  return require[key];                }else if(require[key + '/index']){                  return require[key + '/index'];                }else{                  var temp = ret;                  var module;                  ret = newRequire;                  try {                    module = newRequire(key);                  }                  catch(e){                    ret = temp;                    throw e;                  }                  ret = temp;                  return module;                }            };            for(var key in require){              ret[key] = require[key];            }        }    });    })();  }'use strict';
 
@@ -32236,12 +32557,12 @@ module.exports = {
 ;  var global = (function(){ return this; }).call(null);  if(typeof __filename !== 'undefined'){    var moduleName = __filename.slice(0, __filename.lastIndexOf('.')).replace(/\\/g, '/');    global.require[moduleName] = module.exports;  }
 
 }).call(this,"/src/js/utils/gameConfig.js")
-},{}],208:[function(require,module,exports){
+},{}],223:[function(require,module,exports){
 (function (__filename){
   var global = (function(){ return this; }).call(null);  if(!global.require){    global.require = function require(key){        return global.require[key.replace(/\\/g, '/')];    };    (function(){    var require = global.require;    var ret = global.require;    Object.defineProperty(global, 'require', {        get: function(){          return ret;        },        set: function(newRequire){            ret = function(key){                key = key.replace(/\\/g, '/');                if(require[key]){                  return require[key];                }else if(require[key + '/index']){                  return require[key + '/index'];                }else{                  var temp = ret;                  var module;                  ret = newRequire;                  try {                    module = newRequire(key);                  }                  catch(e){                    ret = temp;                    throw e;                  }                  ret = temp;                  return module;                }            };            for(var key in require){              ret[key] = require[key];            }        }    });    })();  }'use strict';
 
 var WORLD_CONFIG = {
-    assetLocation: '../../assets/',
+    assetLocation: '/src/assets/',
     width: 50,
     height: 50,
     tileWidth: 10,
@@ -32259,7 +32580,7 @@ module.exports = {
 ;  var global = (function(){ return this; }).call(null);  if(typeof __filename !== 'undefined'){    var moduleName = __filename.slice(0, __filename.lastIndexOf('.')).replace(/\\/g, '/');    global.require[moduleName] = module.exports;  }
 
 }).call(this,"/src/js/utils/worldConfig.js")
-},{}],209:[function(require,module,exports){
+},{}],224:[function(require,module,exports){
 (function (__filename){
   var global = (function(){ return this; }).call(null);  if(!global.require){    global.require = function require(key){        return global.require[key.replace(/\\/g, '/')];    };    (function(){    var require = global.require;    var ret = global.require;    Object.defineProperty(global, 'require', {        get: function(){          return ret;        },        set: function(newRequire){            ret = function(key){                key = key.replace(/\\/g, '/');                if(require[key]){                  return require[key];                }else if(require[key + '/index']){                  return require[key + '/index'];                }else{                  var temp = ret;                  var module;                  ret = newRequire;                  try {                    module = newRequire(key);                  }                  catch(e){                    ret = temp;                    throw e;                  }                  ret = temp;                  return module;                }            };            for(var key in require){              ret[key] = require[key];            }        }    });    })();  }/***************************************/
 /* viewController.js
@@ -32278,9 +32599,14 @@ var worldSetup = require('./world/worldSetup.js');
 
 var viewController = function () {
     debugger;
-    var $STAGE = stageSetup.init(GAME_CONFIG);
+    var $STAGE = stageSetup.setupStage(GAME_CONFIG);
+    var $RENDERER = stageSetup.setupRenderer(GAME_CONFIG);
+    $(GAME_CONFIG.selectors.STAGE).html($RENDERER.view);
+
     var $WORLD = worldSetup.init(WORLD_CONFIG);
     $STAGE.addChild($WORLD);
+
+    $RENDERER.render($STAGE);
 };
 
 module.exports = {
@@ -32291,7 +32617,7 @@ module.exports = {
 ;  var global = (function(){ return this; }).call(null);  if(typeof __filename !== 'undefined'){    var moduleName = __filename.slice(0, __filename.lastIndexOf('.')).replace(/\\/g, '/');    global.require[moduleName] = module.exports;  }
 
 }).call(this,"/src/js/viewController.js")
-},{"./stage/stageSetup.js":206,"./utils/gameConfig.js":207,"./utils/worldConfig.js":208,"./world/worldSetup.js":211}],210:[function(require,module,exports){
+},{"./stage/stageSetup.js":221,"./utils/gameConfig.js":222,"./utils/worldConfig.js":223,"./world/worldSetup.js":226}],225:[function(require,module,exports){
 (function (__filename){
   var global = (function(){ return this; }).call(null);  if(!global.require){    global.require = function require(key){        return global.require[key.replace(/\\/g, '/')];    };    (function(){    var require = global.require;    var ret = global.require;    Object.defineProperty(global, 'require', {        get: function(){          return ret;        },        set: function(newRequire){            ret = function(key){                key = key.replace(/\\/g, '/');                if(require[key]){                  return require[key];                }else if(require[key + '/index']){                  return require[key + '/index'];                }else{                  var temp = ret;                  var module;                  ret = newRequire;                  try {                    module = newRequire(key);                  }                  catch(e){                    ret = temp;                    throw e;                  }                  ret = temp;                  return module;                }            };            for(var key in require){              ret[key] = require[key];            }        }    });    })();  };var global = (function(){ return this; }).call(null);global.require['pixi.js'] = require('pixi.js');'use strict';
 
@@ -32316,13 +32642,13 @@ var tile = function (WORLD_CONFIG, type) {
 
 module.exports = {
     init: function (WORLD_CONFIG, type) {
-        return tile (WORLD_CONFIG, type);
+        return tile(WORLD_CONFIG, type);
     }
 };
 ;  var global = (function(){ return this; }).call(null);  if(typeof __filename !== 'undefined'){    var moduleName = __filename.slice(0, __filename.lastIndexOf('.')).replace(/\\/g, '/');    global.require[moduleName] = module.exports;  }
 
 }).call(this,"/src/js/world/tile.js")
-},{"pixi.js":165}],211:[function(require,module,exports){
+},{"pixi.js":167}],226:[function(require,module,exports){
 (function (__filename){
   var global = (function(){ return this; }).call(null);  if(!global.require){    global.require = function require(key){        return global.require[key.replace(/\\/g, '/')];    };    (function(){    var require = global.require;    var ret = global.require;    Object.defineProperty(global, 'require', {        get: function(){          return ret;        },        set: function(newRequire){            ret = function(key){                key = key.replace(/\\/g, '/');                if(require[key]){                  return require[key];                }else if(require[key + '/index']){                  return require[key + '/index'];                }else{                  var temp = ret;                  var module;                  ret = newRequire;                  try {                    module = newRequire(key);                  }                  catch(e){                    ret = temp;                    throw e;                  }                  ret = temp;                  return module;                }            };            for(var key in require){              ret[key] = require[key];            }        }    });    })();  };var global = (function(){ return this; }).call(null);global.require['pixi.js'] = require('pixi.js');// TODO : break this module into multiple for loading, building, etc
 'use strict';
@@ -32353,6 +32679,7 @@ var buildWorld = function (WORLD_CONFIG, container) {
             // Tile.tilePosition.x = 0;
             // Tile.tilePosition.y = 0;
             worldGrid[i][j] = Tile;
+            container.addChild(Tile);
         }
     }
     return container;
@@ -32374,4 +32701,4 @@ module.exports = {
 ;  var global = (function(){ return this; }).call(null);  if(typeof __filename !== 'undefined'){    var moduleName = __filename.slice(0, __filename.lastIndexOf('.')).replace(/\\/g, '/');    global.require[moduleName] = module.exports;  }
 
 }).call(this,"/src/js/world/worldSetup.js")
-},{"./tile.js":210,"pixi.js":165}]},{},[205]);
+},{"./tile.js":225,"pixi.js":167}]},{},[220]);

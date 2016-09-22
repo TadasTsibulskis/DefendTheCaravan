@@ -15,9 +15,14 @@ var worldSetup = require('./world/worldSetup.js');
 
 var viewController = function () {
     debugger;
-    var $STAGE = stageSetup.init(GAME_CONFIG);
+    var $STAGE = stageSetup.setupStage(GAME_CONFIG);
+    var $RENDERER = stageSetup.setupRenderer(GAME_CONFIG);
+    $(GAME_CONFIG.selectors.STAGE).html($RENDERER.view);
+
     var $WORLD = worldSetup.init(WORLD_CONFIG);
     $STAGE.addChild($WORLD);
+
+    $RENDERER.render($STAGE);
 };
 
 module.exports = {
