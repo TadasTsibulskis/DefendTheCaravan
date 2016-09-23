@@ -9,10 +9,15 @@ var WORLD_CONFIG = {
 };
 
 var TILE_NAMES = {
-    grass: 'grass.png'
+    grass: 'grass'
 };
+
+var ASSET_LIST = [
+    'grass.png'
+];
 
 module.exports = {
     constants: WORLD_CONFIG,
-    tile_names: TILE_NAMES
+    tile_names: TILE_NAMES,
+    ASSET_LIST: ASSET_LIST
 };

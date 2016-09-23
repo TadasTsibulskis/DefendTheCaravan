@@ -10,19 +10,25 @@ var GAME_CONFIG = require('./utils/gameConfig.js');
 var WORLD_CONFIG = require('./utils/worldConfig.js');
 
 // Stage stuff
-var stageSetup = require('./stage/stageSetup.js');
+var renderSetup = require('./utils/renderSetup.js');
+var assetLoader = require('./utils/assetLoader.js');
 var worldSetup = require('./world/worldSetup.js');
 
 var viewController = function () {
-    debugger;
-    var $STAGE = stageSetup.setupStage(GAME_CONFIG);
-    var $RENDERER = stageSetup.setupRenderer(GAME_CONFIG);
-    $(GAME_CONFIG.selectors.STAGE).html($RENDERER.view);
+    function loadComplete () {
+        var $WORLD = worldSetup.init($LOADER.resources);
+        setupStage($WORLD);
+    }
 
-    var $WORLD = worldSetup.init(WORLD_CONFIG);
-    $STAGE.addChild($WORLD);
+    function setupStage ($WORLD) {
+        $STAGE.addChild($WORLD);
+        $(GAME_CONFIG.selectors.STAGE).html($RENDERER.view);
+        $RENDERER.render($STAGE);
+    }
 
-    $RENDERER.render($STAGE);
+    var $STAGE = new GAME_CONFIG.PIXI.Container();
+    var $RENDERER = renderSetup.setupRenderer();
+    var $LOADER = assetLoader.loadAssets(loadComplete);
 };
 
 module.exports = {
