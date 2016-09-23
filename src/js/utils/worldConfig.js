@@ -1,11 +1,13 @@
 'use strict';
 
+var GAME_CONFIG = require('./gameConfig.js');
+
 var WORLD_CONFIG = {
-    assetLocation: '/src/assets/',
-    width: 50,
-    height: 50,
-    tileWidth: 10,
-    tileHeight: 10
+    ASSET_LOCATION: '/src/assets/',
+    TILE_WIDTH:  50,
+    TILE_HEIGHT: 50,
+    GAME_WIDTH: GAME_CONFIG.constants.GAME_WIDTH / 50,
+    GAME_HEIGHT: GAME_CONFIG.constants.GAME_HEIGHT / 50
 };
 
 var TILE_NAMES = {

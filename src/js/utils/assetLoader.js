@@ -6,7 +6,7 @@ var WORLD_CONFIG = require('./worldConfig.js');
 var buildAssetArray = function (WORLD_CONFIG) {
     var arr = [];
     for (var i = 0; i < WORLD_CONFIG.ASSET_LIST.length; i++) {
-        arr[i] = WORLD_CONFIG.constants.assetLocation + WORLD_CONFIG.ASSET_LIST[i];
+        arr[i] = WORLD_CONFIG.constants.ASSET_LOCATION + WORLD_CONFIG.ASSET_LIST[i];
     }
     return arr;
 };
