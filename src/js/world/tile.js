@@ -1,10 +1,11 @@
 'use strict';
 
-var PIXI = require('pixi.js');
+var GAME_CONFIG = require('../utils/gameConfig.js');
+var WORLD_CONFIG = require('../utils/worldConfig.js');
 
-var tile = function (WORLD_CONFIG, type) {
+var tile = function ($ASSETS, type) {
 	var tileName = '';
-    switch (type) {
+	switch (type) {
 		case 0 : {
 			tileName = WORLD_CONFIG.tile_names.grass;
 			break;
@@ -14,13 +15,13 @@ var tile = function (WORLD_CONFIG, type) {
 			break;
 		}
 	}
-	var texture = PIXI.Texture.fromImage(WORLD_CONFIG.constants.assetLocation + tileName);
-	PIXI.extras.TilingSprite.call(this, texture, WORLD_CONFIG.constants.tileWidth, WORLD_CONFIG.constants.tileHeight);
-	return texture;
+	var data = $ASSETS[WORLD_CONFIG.constants.assetLocation + tileName + '.png'];
+	var sprite = new GAME_CONFIG.PIXI.Sprite(data.texture);
+	return sprite;
 };
 
 module.exports = {
-    init: function (WORLD_CONFIG, type) {
-        return tile(WORLD_CONFIG, type);
-    }
+	init: function ($ASSETS, type) {
+		return tile($ASSETS, type);
+	}
 };
