@@ -27,6 +27,7 @@ var buildWorld = function (WORLD_CONFIG, container) {
             // Tile.tilePosition.x = 0;
             // Tile.tilePosition.y = 0;
             worldGrid[i][j] = Tile;
+            container.addChild(Tile);
         }
     }
     return container;

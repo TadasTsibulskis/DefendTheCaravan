@@ -21,6 +21,6 @@ var tile = function (WORLD_CONFIG, type) {
 
 module.exports = {
     init: function (WORLD_CONFIG, type) {
-        return tile (WORLD_CONFIG, type);
+        return tile(WORLD_CONFIG, type);
     }
 };

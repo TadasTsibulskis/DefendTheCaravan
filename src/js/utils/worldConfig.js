@@ -1,7 +1,7 @@
 'use strict';
 
 var WORLD_CONFIG = {
-    assetLocation: '../../assets/',
+    assetLocation: '/src/assets/',
     width: 50,
     height: 50,
     tileWidth: 10,
