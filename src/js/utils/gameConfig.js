@@ -1,6 +1,7 @@
 'use strict';
 
 var PIXI = require('pixi.js');
+PIXI.utils._saidHello = true;
 
 var GAME_CONFIG = {
     GAME_WIDTH: 750,

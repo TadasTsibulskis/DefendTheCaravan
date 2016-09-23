@@ -15,8 +15,10 @@ var tile = function ($ASSETS, type) {
 			break;
 		}
 	}
-	var data = $ASSETS[WORLD_CONFIG.constants.assetLocation + tileName + '.png'];
+	var data = $ASSETS[WORLD_CONFIG.constants.ASSET_LOCATION + tileName + '.png'];
 	var sprite = new GAME_CONFIG.PIXI.Sprite(data.texture);
+	sprite.width = WORLD_CONFIG.constants.TILE_WIDTH;
+	sprite.height = WORLD_CONFIG.constants.TILE_HEIGHT;
 	return sprite;
 };
 

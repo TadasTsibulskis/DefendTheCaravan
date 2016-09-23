@@ -1,7 +1,7 @@
 'use strict';
 
-var viewController = require('./js/viewController');
+var $GAME = require('./js/main.js');
 
 (function($) {
-    viewController.init();
+    $GAME.init();
 })(jQuery);
