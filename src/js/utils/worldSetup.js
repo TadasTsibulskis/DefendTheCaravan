@@ -24,7 +24,6 @@ var buildWorld = function ($ASSETS, container) {
 
 var worldSetup = function ($ASSETS) {
     var WORLD = new GAME_CONFIG.PIXI.Container();
-    $DTC.world = WORLD;
     WORLD = buildWorld($ASSETS, WORLD);
     return WORLD;
 };
