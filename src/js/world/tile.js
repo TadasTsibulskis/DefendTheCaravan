@@ -19,6 +19,7 @@ var tile = function ($ASSETS, type) {
 	var sprite = new GAME_CONFIG.PIXI.Sprite(data.texture);
 	sprite.width = WORLD_CONFIG.constants.TILE_WIDTH;
 	sprite.height = WORLD_CONFIG.constants.TILE_HEIGHT;
+	sprite.type = tileName;
 	return sprite;
 };
 

@@ -3,12 +3,12 @@
 var GAME_CONFIG = require('../utils/gameConfig.js');
 var WORLD_CONFIG = require('../utils/worldConfig.js');
 
-var hero = function () {
+var hero = function ($ASSETS) {
 };
 
 module.exports = {
-    init: function () {
-        return hero();
+    init: function ($ASSETS) {
+        return hero($ASSETS);
     }
 };
 

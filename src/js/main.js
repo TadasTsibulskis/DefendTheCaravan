@@ -24,7 +24,7 @@ var main = function () {
     }
 
     var $CANVAS = setupCanvas();
-    var $STAGE = setupStage
+    var $STAGE = setupStage();
     $DTC.stage = $STAGE;
     // var $HERO = setupHero();
     var $GAME_CONTROLLER = setupGame();

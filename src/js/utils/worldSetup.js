@@ -19,6 +19,7 @@ var buildWorld = function ($ASSETS, container) {
             container.addChild(Tile);
         }
     }
+    $DTC.worldGrid = worldGrid;
     return container;
 };
 

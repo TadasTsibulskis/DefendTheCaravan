@@ -13,7 +13,6 @@ var WORLD_CONFIG = require('../utils/worldConfig.js');
 var canvasSetup = require('../utils/canvasSetup.js');
 var assetLoader = require('../utils/assetLoader.js');
 var worldSetup = require('../utils/worldSetup.js');
-var mainHero = require('./hero/hero');
 
 var viewController = function () {};
 
