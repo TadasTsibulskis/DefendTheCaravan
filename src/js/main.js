@@ -12,14 +12,16 @@ var setupStage = function () {
     return viewController.setupStage();
 };
 
-var setupGame = function () {
-    return gameController.init();
+var setupEngine = function () {
+    return gameController.gameLoop();
 };
 
 var main = function () {
     function gameLoop() {
         requestAnimationFrame(gameLoop);
         // $STAGE.children[0].y -= 1;
+        var $GAME_CONTROLLER = setupEngine();
+        $GAME_CONTROLLER.run();
         $CANVAS.render($STAGE);
     }
 
@@ -27,12 +29,11 @@ var main = function () {
     var $STAGE = setupStage();
     $DTC.stage = $STAGE;
     // var $HERO = setupHero();
-    var $GAME_CONTROLLER = setupGame();
 
     /* DEBUGGING */
     console.log('CANVAS', $CANVAS);
     console.log('STAGE', $STAGE);
-    console.log('GAME CONTROLLER', $GAME_CONTROLLER);
+    // console.log('GAME CONTROLLER', $GAME_CONTROLLER);
     /*           */
 
     gameLoop();

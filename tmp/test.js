@@ -32512,11 +32512,16 @@ var $GAME = require('./js/main.js');
   var global = (function(){ return this; }).call(null);  if(!global.require){    global.require = function require(key){        return global.require[key.replace(/\\/g, '/')];    };    (function(){    var require = global.require;    var ret = global.require;    Object.defineProperty(global, 'require', {        get: function(){          return ret;        },        set: function(newRequire){            ret = function(key){                key = key.replace(/\\/g, '/');                if(require[key]){                  return require[key];                }else if(require[key + '/index']){                  return require[key + '/index'];                }else{                  var temp = ret;                  var module;                  ret = newRequire;                  try {                    module = newRequire(key);                  }                  catch(e){                    ret = temp;                    throw e;                  }                  ret = temp;                  return module;                }            };            for(var key in require){              ret[key] = require[key];            }        }    });    })();  }'use strict';
 
 var gameController = function ($VIEW_CONTROLLER) {
+    // return object that contains functions that can be accessed 1 level up scope
+};
+
+gameController.prototype.run = function () {
+    console.log('running');  
 };
 
 module.exports = {
-    init: function () {
-        return gameController();
+    gameLoop: function () {
+        return new gameController();
     }
 };
 ;  var global = (function(){ return this; }).call(null);  if(typeof __filename !== 'undefined'){    var moduleName = __filename.slice(0, __filename.lastIndexOf('.')).replace(/\\/g, '/');    global.require[moduleName] = module.exports;  }
@@ -32599,14 +32604,16 @@ var setupStage = function () {
     return viewController.setupStage();
 };
 
-var setupGame = function () {
-    return gameController.init();
+var setupEngine = function () {
+    return gameController.gameLoop();
 };
 
 var main = function () {
     function gameLoop() {
         requestAnimationFrame(gameLoop);
         // $STAGE.children[0].y -= 1;
+        var $GAME_CONTROLLER = setupEngine();
+        $GAME_CONTROLLER.run();
         $CANVAS.render($STAGE);
     }
 
@@ -32614,12 +32621,11 @@ var main = function () {
     var $STAGE = setupStage();
     $DTC.stage = $STAGE;
     // var $HERO = setupHero();
-    var $GAME_CONTROLLER = setupGame();
 
     /* DEBUGGING */
     console.log('CANVAS', $CANVAS);
     console.log('STAGE', $STAGE);
-    console.log('GAME CONTROLLER', $GAME_CONTROLLER);
+    // console.log('GAME CONTROLLER', $GAME_CONTROLLER);
     /*           */
 
     gameLoop();
