@@ -2,6 +2,7 @@
 
 var viewController = require('./controllers/viewController');
 var gameController = require('./controllers/gameController');
+var inputController = require('./controllers/inputController');
 // var mainHero = require('./hero/hero');
 
 var setupCanvas = function () {
@@ -13,24 +14,31 @@ var setupStage = function () {
 };
 
 var setupEngine = function () {
-    return gameController.gameLoop();
+    return gameController.init();
+};
+
+var setupControls = function () {
+    return inputController.init();
 };
 
 var main = function () {
     function gameLoop() {
-        requestAnimationFrame(gameLoop);
-        // $STAGE.children[0].y -= 1;
-        var $GAME_CONTROLLER = setupEngine();
+        requestAnimationFrame(gameLoop);        
         $GAME_CONTROLLER.run();
         $CANVAS.render($STAGE);
     }
 
+    // TOOD : Move loader into this file to ensure all loading is done before game loop starts
+
     var $CANVAS = setupCanvas();
     var $STAGE = setupStage();
-    $DTC.stage = $STAGE;
+    var $GAME_CONTROLLER = setupEngine();
+    var $INPUT_CONTROLLER = setupControls();
+
     // var $HERO = setupHero();
 
     /* DEBUGGING */
+    $DTC.stage = $STAGE;
     console.log('CANVAS', $CANVAS);
     console.log('STAGE', $STAGE);
     // console.log('GAME CONTROLLER', $GAME_CONTROLLER);

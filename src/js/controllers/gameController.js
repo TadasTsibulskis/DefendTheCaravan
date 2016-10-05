@@ -5,11 +5,10 @@ var gameController = function ($VIEW_CONTROLLER) {
 };
 
 gameController.prototype.run = function () {
-    console.log('running');  
 };
 
 module.exports = {
-    gameLoop: function () {
+    init: function () {
         return new gameController();
     }
 };

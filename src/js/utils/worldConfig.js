@@ -6,8 +6,8 @@ var WORLD_CONFIG = {
     ASSET_LOCATION: '/src/assets/',
     TILE_WIDTH:  50,
     TILE_HEIGHT: 50,
-    GAME_WIDTH: GAME_CONFIG.constants.GAME_WIDTH / 50,
-    GAME_HEIGHT: GAME_CONFIG.constants.GAME_HEIGHT / 50
+    GAME_WIDTH: 6,
+    GAME_HEIGHT: 6
 };
 
 var TILE_NAMES = {

@@ -19,13 +19,21 @@ var buildWorld = function ($ASSETS, container) {
             container.addChild(Tile);
         }
     }
-    $DTC.worldGrid = worldGrid;
+    $DTC.worldGrid = container;
     return container;
+};
+
+var centerWorld = function (WORLD) {
+    WORLD.x = (GAME_CONFIG.constants.GAME_WIDTH / 2) - (WORLD.width / 2);
+    WORLD.y = (GAME_CONFIG.constants.GAME_HEIGHT - WORLD.height);
+    return WORLD;
 };
 
 var worldSetup = function ($ASSETS) {
     var WORLD = new GAME_CONFIG.PIXI.Container();
     WORLD = buildWorld($ASSETS, WORLD);
+    WORLD = centerWorld(WORLD);
+    console.log(WORLD.x, WORLD.y);
     return WORLD;
 };
 
