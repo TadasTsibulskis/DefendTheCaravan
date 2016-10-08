@@ -32608,7 +32608,7 @@ var inputController = function () {
 
 module.exports = {
     init: function () {
-        return inputController();
+        return new inputController();
     }
 }
 ;  var global = (function(){ return this; }).call(null);  if(typeof __filename !== 'undefined'){    var moduleName = __filename.slice(0, __filename.lastIndexOf('.')).replace(/\\/g, '/');    global.require[moduleName] = module.exports;  }
@@ -32631,6 +32631,7 @@ var WORLD_CONFIG = require('../utils/worldConfig.js');
 var canvasSetup = require('../utils/canvasSetup.js');
 var assetLoader = require('../utils/assetLoader.js');
 var worldSetup = require('../utils/worldSetup.js');
+var guiSetup = require('../utils/guiSetup.js');
 
 var viewController = function () {};
 
@@ -32643,7 +32644,9 @@ var setupCanvas = function() {
 var setupStage = function () {
     function loadComplete () {
         var $WORLD = worldSetup.init(worldLoader.resources);
+        var $GUI = guiSetup.init();
         $STAGE.addChild($WORLD);
+        $STAGE.addChild($GUI);
     }
 
     var worldLoader = assetLoader.loadAssets(loadComplete);
@@ -32675,7 +32678,7 @@ module.exports = {
 ;  var global = (function(){ return this; }).call(null);  if(typeof __filename !== 'undefined'){    var moduleName = __filename.slice(0, __filename.lastIndexOf('.')).replace(/\\/g, '/');    global.require[moduleName] = module.exports;  }
 
 }).call(this,"/src/js/controllers/viewController.js")
-},{"../utils/assetLoader.js":225,"../utils/canvasSetup.js":226,"../utils/gameConfig.js":227,"../utils/worldConfig.js":228,"../utils/worldSetup.js":229}],224:[function(require,module,exports){
+},{"../utils/assetLoader.js":225,"../utils/canvasSetup.js":226,"../utils/gameConfig.js":227,"../utils/guiSetup.js":228,"../utils/worldConfig.js":229,"../utils/worldSetup.js":230}],224:[function(require,module,exports){
 (function (__filename){
   var global = (function(){ return this; }).call(null);  if(!global.require){    global.require = function require(key){        return global.require[key.replace(/\\/g, '/')];    };    (function(){    var require = global.require;    var ret = global.require;    Object.defineProperty(global, 'require', {        get: function(){          return ret;        },        set: function(newRequire){            ret = function(key){                key = key.replace(/\\/g, '/');                if(require[key]){                  return require[key];                }else if(require[key + '/index']){                  return require[key + '/index'];                }else{                  var temp = ret;                  var module;                  ret = newRequire;                  try {                    module = newRequire(key);                  }                  catch(e){                    ret = temp;                    throw e;                  }                  ret = temp;                  return module;                }            };            for(var key in require){              ret[key] = require[key];            }        }    });    })();  }'use strict';
 
@@ -32718,9 +32721,12 @@ var main = function () {
 
     /* DEBUGGING */
     $DTC.stage = $STAGE;
+    $DTC.game_controller = $GAME_CONTROLLER;
+    $DTC.input_controller = $INPUT_CONTROLLER;
     console.log('CANVAS', $CANVAS);
     console.log('STAGE', $STAGE);
-    // console.log('GAME CONTROLLER', $GAME_CONTROLLER);
+    console.log('GAME CONTROLLER', $GAME_CONTROLLER);
+    console.log('INPUT CONTROLLER', $INPUT_CONTROLLER);
     /*           */
 
     gameLoop();
@@ -32771,7 +32777,7 @@ module.exports = {
 ;  var global = (function(){ return this; }).call(null);  if(typeof __filename !== 'undefined'){    var moduleName = __filename.slice(0, __filename.lastIndexOf('.')).replace(/\\/g, '/');    global.require[moduleName] = module.exports;  }
 
 }).call(this,"/src/js/utils/assetLoader.js")
-},{"./gameConfig.js":227,"./worldConfig.js":228}],226:[function(require,module,exports){
+},{"./gameConfig.js":227,"./worldConfig.js":229}],226:[function(require,module,exports){
 (function (__filename){
   var global = (function(){ return this; }).call(null);  if(!global.require){    global.require = function require(key){        return global.require[key.replace(/\\/g, '/')];    };    (function(){    var require = global.require;    var ret = global.require;    Object.defineProperty(global, 'require', {        get: function(){          return ret;        },        set: function(newRequire){            ret = function(key){                key = key.replace(/\\/g, '/');                if(require[key]){                  return require[key];                }else if(require[key + '/index']){                  return require[key + '/index'];                }else{                  var temp = ret;                  var module;                  ret = newRequire;                  try {                    module = newRequire(key);                  }                  catch(e){                    ret = temp;                    throw e;                  }                  ret = temp;                  return module;                }            };            for(var key in require){              ret[key] = require[key];            }        }    });    })();  }'use strict';
 
@@ -32798,8 +32804,10 @@ var PIXI = require('pixi.js');
 PIXI.utils._saidHello = true;
 
 var GAME_CONFIG = {
-    GAME_WIDTH: 750,
-    GAME_HEIGHT: 500,
+    GAME_WIDTH: 900,
+    GAME_HEIGHT: 506,
+    GUI_WIDTH: 900,
+    GUI_HEIGHT: 80,
     ANTIALIAS: false,
     TRANSPARENT: false,
     RESOLUTION: 1
@@ -32822,21 +32830,52 @@ module.exports = {
   var global = (function(){ return this; }).call(null);  if(!global.require){    global.require = function require(key){        return global.require[key.replace(/\\/g, '/')];    };    (function(){    var require = global.require;    var ret = global.require;    Object.defineProperty(global, 'require', {        get: function(){          return ret;        },        set: function(newRequire){            ret = function(key){                key = key.replace(/\\/g, '/');                if(require[key]){                  return require[key];                }else if(require[key + '/index']){                  return require[key + '/index'];                }else{                  var temp = ret;                  var module;                  ret = newRequire;                  try {                    module = newRequire(key);                  }                  catch(e){                    ret = temp;                    throw e;                  }                  ret = temp;                  return module;                }            };            for(var key in require){              ret[key] = require[key];            }        }    });    })();  }'use strict';
 
 var GAME_CONFIG = require('./gameConfig.js');
+var WORLD_CONFIG = require('./worldConfig.js');
+
+var guiSetup = function () {
+    var $GUI = new GAME_CONFIG.PIXI.Graphics();
+    $GUI.beginFill(0xBB22AE);
+    $GUI.drawRect(0, 0, GAME_CONFIG.constants.GUI_WIDTH, GAME_CONFIG.constants.GUI_HEIGHT);
+    $GUI.endFill();
+    $GUI.x = 0;
+    $GUI.y = GAME_CONFIG.constants.GAME_HEIGHT - $GUI.height;
+    return $GUI;
+};
+
+module.exports = {
+    init: function () {
+        return guiSetup();
+    }
+};
+;  var global = (function(){ return this; }).call(null);  if(typeof __filename !== 'undefined'){    var moduleName = __filename.slice(0, __filename.lastIndexOf('.')).replace(/\\/g, '/');    global.require[moduleName] = module.exports;  }
+
+}).call(this,"/src/js/utils/guiSetup.js")
+},{"./gameConfig.js":227,"./worldConfig.js":229}],229:[function(require,module,exports){
+(function (__filename){
+  var global = (function(){ return this; }).call(null);  if(!global.require){    global.require = function require(key){        return global.require[key.replace(/\\/g, '/')];    };    (function(){    var require = global.require;    var ret = global.require;    Object.defineProperty(global, 'require', {        get: function(){          return ret;        },        set: function(newRequire){            ret = function(key){                key = key.replace(/\\/g, '/');                if(require[key]){                  return require[key];                }else if(require[key + '/index']){                  return require[key + '/index'];                }else{                  var temp = ret;                  var module;                  ret = newRequire;                  try {                    module = newRequire(key);                  }                  catch(e){                    ret = temp;                    throw e;                  }                  ret = temp;                  return module;                }            };            for(var key in require){              ret[key] = require[key];            }        }    });    })();  }'use strict';
+
+var GAME_CONFIG = require('./gameConfig.js');
 
 var WORLD_CONFIG = {
     ASSET_LOCATION: '/src/assets/',
     TILE_WIDTH:  50,
     TILE_HEIGHT: 50,
-    GAME_WIDTH: 6,
-    GAME_HEIGHT: 6
+    GAME_WIDTH: 22,
+    GAME_HEIGHT: 22
 };
 
 var TILE_NAMES = {
-    grass: 'grass'
+    grass: 'grass-01',
+    path: 'path-01',
+    path_left: 'path-01left',
+    path_right: 'path-01right'
 };
 
 var ASSET_LIST = [
-    'grass.png'
+    'grass-01.png',
+    'path-01.png',
+    'path-01left.png',
+    'path-01right.png'
 ];
 
 module.exports = {
@@ -32847,7 +32886,7 @@ module.exports = {
 ;  var global = (function(){ return this; }).call(null);  if(typeof __filename !== 'undefined'){    var moduleName = __filename.slice(0, __filename.lastIndexOf('.')).replace(/\\/g, '/');    global.require[moduleName] = module.exports;  }
 
 }).call(this,"/src/js/utils/worldConfig.js")
-},{"./gameConfig.js":227}],229:[function(require,module,exports){
+},{"./gameConfig.js":227}],230:[function(require,module,exports){
   var global = (function(){ return this; }).call(null);  if(!global.require){    global.require = function require(key){        return global.require[key.replace(/\\/g, '/')];    };    (function(){    var require = global.require;    var ret = global.require;    Object.defineProperty(global, 'require', {        get: function(){          return ret;        },        set: function(newRequire){            ret = function(key){                key = key.replace(/\\/g, '/');                if(require[key]){                  return require[key];                }else if(require[key + '/index']){                  return require[key + '/index'];                }else{                  var temp = ret;                  var module;                  ret = newRequire;                  try {                    module = newRequire(key);                  }                  catch(e){                    ret = temp;                    throw e;                  }                  ret = temp;                  return module;                }            };            for(var key in require){              ret[key] = require[key];            }        }    });    })();  }'use strict';
 
 var GAME_CONFIG = require('./gameConfig.js');
@@ -32862,7 +32901,17 @@ var buildWorld = function ($ASSETS, container) {
 
     for (var i = 0; i < WORLD_CONFIG.constants.GAME_HEIGHT; i++) {
         for (var j = 0; j < WORLD_CONFIG.constants.GAME_WIDTH; j++) {
-            var Tile = TILE.init($ASSETS, 0);
+            var tileType = 'grass';
+            if (j === 10) {
+                tileType = 'path_left';
+            }
+            if (j === 11) {
+                tileType = 'path';
+            }
+            if (j === 12) {
+                tileType = 'path_right';
+            }
+            var Tile = TILE.init($ASSETS, tileType);
             Tile.x = Math.floor(j * WORLD_CONFIG.constants.TILE_WIDTH);
             Tile.y = Math.floor(i * WORLD_CONFIG.constants.TILE_HEIGHT);
             worldGrid[i][j] = Tile;
@@ -32875,7 +32924,7 @@ var buildWorld = function ($ASSETS, container) {
 
 var centerWorld = function (WORLD) {
     WORLD.x = (GAME_CONFIG.constants.GAME_WIDTH / 2) - (WORLD.width / 2);
-    WORLD.y = (GAME_CONFIG.constants.GAME_HEIGHT - WORLD.height);
+    WORLD.y = (GAME_CONFIG.constants.GAME_HEIGHT - WORLD.height - GAME_CONFIG.constants.GUI_HEIGHT / 2);
     return WORLD;
 };
 
@@ -32893,20 +32942,40 @@ module.exports = {
     }
 };
 
-// TODO : Use dynamic container + pixi container;  var global = (function(){ return this; }).call(null);  if(typeof __filename !== 'undefined'){    var moduleName = __filename.slice(0, __filename.lastIndexOf('.')).replace(/\\/g, '/');    global.require[moduleName] = module.exports;  }
+// TODO : Use dynamic container + pixi container to determine which tiles get added to WORLD and thus rendered;  var global = (function(){ return this; }).call(null);  if(typeof __filename !== 'undefined'){    var moduleName = __filename.slice(0, __filename.lastIndexOf('.')).replace(/\\/g, '/');    global.require[moduleName] = module.exports;  }
 
-},{"../world/tile.js":230,"./gameConfig.js":227,"./worldConfig.js":228}],230:[function(require,module,exports){
+},{"../world/tile.js":231,"./gameConfig.js":227,"./worldConfig.js":229}],231:[function(require,module,exports){
 (function (__filename){
   var global = (function(){ return this; }).call(null);  if(!global.require){    global.require = function require(key){        return global.require[key.replace(/\\/g, '/')];    };    (function(){    var require = global.require;    var ret = global.require;    Object.defineProperty(global, 'require', {        get: function(){          return ret;        },        set: function(newRequire){            ret = function(key){                key = key.replace(/\\/g, '/');                if(require[key]){                  return require[key];                }else if(require[key + '/index']){                  return require[key + '/index'];                }else{                  var temp = ret;                  var module;                  ret = newRequire;                  try {                    module = newRequire(key);                  }                  catch(e){                    ret = temp;                    throw e;                  }                  ret = temp;                  return module;                }            };            for(var key in require){              ret[key] = require[key];            }        }    });    })();  }'use strict';
 
 var GAME_CONFIG = require('../utils/gameConfig.js');
 var WORLD_CONFIG = require('../utils/worldConfig.js');
 
-var tile = function ($ASSETS, type) {
-	var tileName = '';
-	switch (type) {
-		case 0 : {
-			tileName = WORLD_CONFIG.tile_names.grass;
+var rotateRandom = function (sprite) {
+	var min = 1;
+	var max = 4;
+	var random = (Math.floor(Math.random() * (max - min + 1)) + min);
+
+	var degree = 0;
+
+	switch (random) {
+		case 1 : {
+			degree = 0;
+			break;
+		}
+
+		case 2 : {
+			degree = (Math.PI / 2);
+			break;
+		}
+
+		case 3 : {
+			degree = Math.PI;
+			break;
+		}
+
+		case 4 : {
+			degree = ((3 * Math.PI) / 2);
 			break;
 		}
 
@@ -32914,11 +32983,54 @@ var tile = function ($ASSETS, type) {
 			break;
 		}
 	}
+	sprite.rotation = degree;
+
+	return sprite;
+};
+
+var tile = function ($ASSETS, type) {
+	var tileName = '';
+	var rotateable = false;
+	switch (type) {
+		case 'grass' : {
+			tileName = WORLD_CONFIG.tile_names.grass;
+			rotateable = true;
+			break;
+		}
+
+		case 'path' : {
+			tileName = WORLD_CONFIG.tile_names.path;
+			rotateable = true;
+			break;
+		}
+
+		case 'path_left' : {
+			tileName = WORLD_CONFIG.tile_names.path_left;
+			rotateable = false;
+			break;
+		}
+
+		case 'path_right' : {
+			tileName = WORLD_CONFIG.tile_names.path_right;
+			rotateable = false;
+			break;
+		}
+
+		default : {
+			break;
+		}
+	}
+
 	var data = $ASSETS[WORLD_CONFIG.constants.ASSET_LOCATION + tileName + '.png'];
 	var sprite = new GAME_CONFIG.PIXI.Sprite(data.texture);
 	sprite.width = WORLD_CONFIG.constants.TILE_WIDTH;
 	sprite.height = WORLD_CONFIG.constants.TILE_HEIGHT;
+	sprite.pivot._x = WORLD_CONFIG.constants.TILE_WIDTH / 2;
+	sprite.pivot._y = WORLD_CONFIG.constants.TILE_HEIGHT/ 2;
 	sprite.type = tileName;
+	if (rotateable) {
+		sprite = rotateRandom(sprite);
+	}
 	return sprite;
 };
 
@@ -32930,4 +33042,4 @@ module.exports = {
 ;  var global = (function(){ return this; }).call(null);  if(typeof __filename !== 'undefined'){    var moduleName = __filename.slice(0, __filename.lastIndexOf('.')).replace(/\\/g, '/');    global.require[moduleName] = module.exports;  }
 
 }).call(this,"/src/js/world/tile.js")
-},{"../utils/gameConfig.js":227,"../utils/worldConfig.js":228}]},{},[220]);
+},{"../utils/gameConfig.js":227,"../utils/worldConfig.js":229}]},{},[220]);

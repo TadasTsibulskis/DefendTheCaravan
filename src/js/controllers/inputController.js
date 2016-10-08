@@ -78,6 +78,6 @@ var inputController = function () {
 
 module.exports = {
     init: function () {
-        return inputController();
+        return new inputController();
     }
 }

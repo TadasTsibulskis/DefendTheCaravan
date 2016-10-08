@@ -13,6 +13,7 @@ var WORLD_CONFIG = require('../utils/worldConfig.js');
 var canvasSetup = require('../utils/canvasSetup.js');
 var assetLoader = require('../utils/assetLoader.js');
 var worldSetup = require('../utils/worldSetup.js');
+var guiSetup = require('../utils/guiSetup.js');
 
 var viewController = function () {};
 
@@ -25,7 +26,9 @@ var setupCanvas = function() {
 var setupStage = function () {
     function loadComplete () {
         var $WORLD = worldSetup.init(worldLoader.resources);
+        var $GUI = guiSetup.init();
         $STAGE.addChild($WORLD);
+        $STAGE.addChild($GUI);
     }
 
     var worldLoader = assetLoader.loadAssets(loadComplete);

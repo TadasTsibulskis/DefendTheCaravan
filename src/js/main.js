@@ -39,9 +39,12 @@ var main = function () {
 
     /* DEBUGGING */
     $DTC.stage = $STAGE;
+    $DTC.game_controller = $GAME_CONTROLLER;
+    $DTC.input_controller = $INPUT_CONTROLLER;
     console.log('CANVAS', $CANVAS);
     console.log('STAGE', $STAGE);
-    // console.log('GAME CONTROLLER', $GAME_CONTROLLER);
+    console.log('GAME CONTROLLER', $GAME_CONTROLLER);
+    console.log('INPUT CONTROLLER', $INPUT_CONTROLLER);
     /*           */
 
     gameLoop();

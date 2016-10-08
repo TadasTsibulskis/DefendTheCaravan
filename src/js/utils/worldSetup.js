@@ -12,7 +12,17 @@ var buildWorld = function ($ASSETS, container) {
 
     for (var i = 0; i < WORLD_CONFIG.constants.GAME_HEIGHT; i++) {
         for (var j = 0; j < WORLD_CONFIG.constants.GAME_WIDTH; j++) {
-            var Tile = TILE.init($ASSETS, 0);
+            var tileType = 'grass';
+            if (j === 10) {
+                tileType = 'path_left';
+            }
+            if (j === 11) {
+                tileType = 'path';
+            }
+            if (j === 12) {
+                tileType = 'path_right';
+            }
+            var Tile = TILE.init($ASSETS, tileType);
             Tile.x = Math.floor(j * WORLD_CONFIG.constants.TILE_WIDTH);
             Tile.y = Math.floor(i * WORLD_CONFIG.constants.TILE_HEIGHT);
             worldGrid[i][j] = Tile;
@@ -25,7 +35,7 @@ var buildWorld = function ($ASSETS, container) {
 
 var centerWorld = function (WORLD) {
     WORLD.x = (GAME_CONFIG.constants.GAME_WIDTH / 2) - (WORLD.width / 2);
-    WORLD.y = (GAME_CONFIG.constants.GAME_HEIGHT - WORLD.height);
+    WORLD.y = (GAME_CONFIG.constants.GAME_HEIGHT - WORLD.height - GAME_CONFIG.constants.GUI_HEIGHT / 2);
     return WORLD;
 };
 
@@ -43,4 +53,4 @@ module.exports = {
     }
 };
 
-// TODO : Use dynamic container + pixi container
+// TODO : Use dynamic container + pixi container to determine which tiles get added to WORLD and thus rendered

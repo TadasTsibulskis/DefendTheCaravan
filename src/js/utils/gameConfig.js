@@ -4,8 +4,10 @@ var PIXI = require('pixi.js');
 PIXI.utils._saidHello = true;
 
 var GAME_CONFIG = {
-    GAME_WIDTH: 750,
-    GAME_HEIGHT: 500,
+    GAME_WIDTH: 900,
+    GAME_HEIGHT: 506,
+    GUI_WIDTH: 900,
+    GUI_HEIGHT: 80,
     ANTIALIAS: false,
     TRANSPARENT: false,
     RESOLUTION: 1
