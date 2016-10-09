@@ -13,7 +13,8 @@ var WORLD_CONFIG = require('../utils/worldConfig.js');
 var canvasSetup = require('../utils/canvasSetup.js');
 var assetLoader = require('../utils/assetLoader.js');
 var worldSetup = require('../utils/worldSetup.js');
-var guiSetup = require('../utils/guiSetup.js');
+var uiSetup = require('../utils/uiSetup.js');
+var mainHero = require('../hero/mainHero.js');
 
 var viewController = function () {};
 
@@ -26,9 +27,15 @@ var setupCanvas = function() {
 var setupStage = function () {
     function loadComplete () {
         var $WORLD = worldSetup.init(worldLoader.resources);
-        var $GUI = guiSetup.init();
+        var $UI = uiSetup.init();
+        var $HERO = mainHero.init(worldLoader.resources);
+        
+        /* DEBUG */
+        $DTC.hero = $HERO;
+
         $STAGE.addChild($WORLD);
-        $STAGE.addChild($GUI);
+        $STAGE.addChild($UI);
+        $STAGE.addChild($HERO);
     }
 
     var worldLoader = assetLoader.loadAssets(loadComplete);

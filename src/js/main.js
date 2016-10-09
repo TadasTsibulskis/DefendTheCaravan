@@ -3,7 +3,6 @@
 var viewController = require('./controllers/viewController');
 var gameController = require('./controllers/gameController');
 var inputController = require('./controllers/inputController');
-// var mainHero = require('./hero/hero');
 
 var setupCanvas = function () {
     return viewController.setupCanvas();
@@ -34,8 +33,6 @@ var main = function () {
     var $STAGE = setupStage();
     var $GAME_CONTROLLER = setupEngine();
     var $INPUT_CONTROLLER = setupControls();
-
-    // var $HERO = setupHero();
 
     /* DEBUGGING */
     $DTC.stage = $STAGE;

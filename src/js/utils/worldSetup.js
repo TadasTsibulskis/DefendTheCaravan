@@ -35,7 +35,7 @@ var buildWorld = function ($ASSETS, container) {
 
 var centerWorld = function (WORLD) {
     WORLD.x = (GAME_CONFIG.constants.GAME_WIDTH / 2) - (WORLD.width / 2);
-    WORLD.y = (GAME_CONFIG.constants.GAME_HEIGHT - WORLD.height - GAME_CONFIG.constants.GUI_HEIGHT / 2);
+    WORLD.y = (GAME_CONFIG.constants.GAME_HEIGHT - WORLD.height - GAME_CONFIG.constants.UI_HEIGHT / 2);
     return WORLD;
 };
 
@@ -43,7 +43,6 @@ var worldSetup = function ($ASSETS) {
     var WORLD = new GAME_CONFIG.PIXI.Container();
     WORLD = buildWorld($ASSETS, WORLD);
     WORLD = centerWorld(WORLD);
-    console.log(WORLD.x, WORLD.y);
     return WORLD;
 };
 

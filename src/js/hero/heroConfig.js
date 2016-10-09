@@ -2,16 +2,17 @@
 
 
 var HERO_CONFIG = {
-    HERO_WIDTH: 50,
-    HERO_HEIGHT: 50
+    ASSET_LOCATION: '/src/assets/',
+    HERO_WIDTH: 71,
+    HERO_HEIGHT: 159
 };
 
 var CART_TYPES = {
-    testCart: 'testCart'
+    cart: 'cart'
 };
 
 var ASSET_LIST = [
-    'test-cart.png'
+    'cart.png'
 ];
 
 module.exports = {

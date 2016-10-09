@@ -1,41 +1,21 @@
 'use strict';
 
 var GAME_CONFIG = require('../utils/gameConfig.js');
-var WORLD_CONFIG = require('../utils/worldConfig.js');
+var HERO_CONFIG = require('./heroConfig.js');
 
-var hero = function ($ASSETS) {
-};
-
-module.exports = {
-    init: function ($ASSETS) {
-        return hero($ASSETS);
-    }
-};
-
-'use strict';
-
-/*
-var tile = function ($ASSETS, type) {
-	var tileName = '';
-	switch (type) {
-		case 0 : {
-			tileName = WORLD_CONFIG.tile_names.grass;
-			break;
-		}
-
-		default : {
-			break;
-		}
-	}
-	var data = $ASSETS[WORLD_CONFIG.constants.ASSET_LOCATION + tileName + '.png'];
+var hero = function ($ASSETS, type) {
+	var cartType = 'cart';
+	var data = $ASSETS[HERO_CONFIG.constants.ASSET_LOCATION + cartType + '.png'];
 	var sprite = new GAME_CONFIG.PIXI.Sprite(data.texture);
-	sprite.width = WORLD_CONFIG.constants.TILE_WIDTH;
-	sprite.height = WORLD_CONFIG.constants.TILE_HEIGHT;
+	sprite.width = HERO_CONFIG.constants.HERO_WIDTH;
+	sprite.height = HERO_CONFIG.constants.HERO_HEIGHT;
+	sprite.x = (GAME_CONFIG.constants.GAME_WIDTH / 2) - (sprite.width / 2);
+    sprite.y = (GAME_CONFIG.constants.GAME_HEIGHT / 2) - (100);
 	return sprite;
 };
 
 module.exports = {
 	init: function ($ASSETS, type) {
-		return tile($ASSETS, type);
+		return hero($ASSETS, type);
 	}
-};*/
+};

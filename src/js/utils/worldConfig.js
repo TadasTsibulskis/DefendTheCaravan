@@ -17,15 +17,21 @@ var TILE_NAMES = {
     path_right: 'path-01right'
 };
 
+var CARTS_ALL = {
+    cart_01: 'cart.png'
+};
+
 var ASSET_LIST = [
     'grass-01.png',
     'path-01.png',
     'path-01left.png',
-    'path-01right.png'
+    'path-01right.png',
+    'cart.png'
 ];
 
 module.exports = {
     constants: WORLD_CONFIG,
     tile_names: TILE_NAMES,
+    carts_all: CARTS_ALL,
     ASSET_LIST: ASSET_LIST
 };
