@@ -32691,7 +32691,7 @@ module.exports = {
 
 
 var HERO_CONFIG = {
-    ASSET_LOCATION: '/src/assets/',
+    ASSET_LOCATION: window.location.href + '/../assets/',
     HERO_WIDTH: 71,
     HERO_HEIGHT: 159
 };
@@ -32723,10 +32723,10 @@ var hero = function ($ASSETS, type) {
 	var cartType = 'cart';
 	var data = $ASSETS[HERO_CONFIG.constants.ASSET_LOCATION + cartType + '.png'];
 	var sprite = new GAME_CONFIG.PIXI.Sprite(data.texture);
-	/*sprite.width = HERO_CONFIG.constants.HERO_WIDTH;
-	sprite.height = HERO_CONFIG.constants.HERO_HEIGHT;*/
+	sprite.width = HERO_CONFIG.constants.HERO_WIDTH;
+	sprite.height = HERO_CONFIG.constants.HERO_HEIGHT;
 	sprite.x = (GAME_CONFIG.constants.GAME_WIDTH / 2) - (sprite.width / 2);
-    //sprite.y = (GAME_CONFIG.constants.GAME_HEIGHT / 2) - (100);
+    sprite.y = (GAME_CONFIG.constants.GAME_HEIGHT / 2) - (100);
 	return sprite;
 };
 
@@ -32917,7 +32917,7 @@ module.exports = {
 var GAME_CONFIG = require('./gameConfig.js');
 
 var WORLD_CONFIG = {
-    ASSET_LOCATION: '/src/assets/',
+    ASSET_LOCATION: window.location.href + '/../assets/',
     TILE_WIDTH:  50,
     TILE_HEIGHT: 50,
     GAME_WIDTH: 22,

@@ -3,7 +3,7 @@
 var GAME_CONFIG = require('./gameConfig.js');
 
 var WORLD_CONFIG = {
-    ASSET_LOCATION: '/src/assets/',
+    ASSET_LOCATION: window.location.href + '/../assets/',
     TILE_WIDTH:  50,
     TILE_HEIGHT: 50,
     GAME_WIDTH: 22,
