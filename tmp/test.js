@@ -32859,12 +32859,13 @@ module.exports = {
   var global = (function(){ return this; }).call(null);  if(!global.require){    global.require = function require(key){        return global.require[key.replace(/\\/g, '/')];    };    (function(){    var require = global.require;    var ret = global.require;    Object.defineProperty(global, 'require', {        get: function(){          return ret;        },        set: function(newRequire){            ret = function(key){                key = key.replace(/\\/g, '/');                if(require[key]){                  return require[key];                }else if(require[key + '/index']){                  return require[key + '/index'];                }else{                  var temp = ret;                  var module;                  ret = newRequire;                  try {                    module = newRequire(key);                  }                  catch(e){                    ret = temp;                    throw e;                  }                  ret = temp;                  return module;                }            };            for(var key in require){              ret[key] = require[key];            }        }    });    })();  };var global = (function(){ return this; }).call(null);global.require['pixi.js'] = require('pixi.js');'use strict';
 
 var PIXI = require('pixi.js');
+// Removes console log
 PIXI.utils._saidHello = true;
 
 var GAME_CONFIG = {
-    GAME_WIDTH: 900,
-    GAME_HEIGHT: 506,
-    UI_WIDTH: 900,
+    GAME_WIDTH: 1334,
+    GAME_HEIGHT: 750,
+    UI_WIDTH: 1334,
     UI_HEIGHT: 80,
     RENDER_OPTIONS: {
         antialias: false, 
@@ -32897,7 +32898,7 @@ var uiSetup = function () {
     $UI.beginFill(0xBB22AE);
     $UI.drawRect(0, 0, GAME_CONFIG.constants.UI_WIDTH, GAME_CONFIG.constants.UI_HEIGHT);
     $UI.endFill();
-    $UI.x = 0;
+    $UI.x = (GAME_CONFIG.constants.GAME_WIDTH / 2) - ($UI.width / 2);
     $UI.y = GAME_CONFIG.constants.GAME_HEIGHT - $UI.height;
     return $UI;
 };
@@ -32920,8 +32921,8 @@ var WORLD_CONFIG = {
     ASSET_LOCATION: window.location.href + '/../assets/',
     TILE_WIDTH:  50,
     TILE_HEIGHT: 50,
-    GAME_WIDTH: 22,
-    GAME_HEIGHT: 22
+    GAME_WIDTH: 30,
+    GAME_HEIGHT: 30
 };
 
 var TILE_NAMES = {
@@ -32968,13 +32969,13 @@ var buildWorld = function ($ASSETS, container) {
     for (var i = 0; i < WORLD_CONFIG.constants.GAME_HEIGHT; i++) {
         for (var j = 0; j < WORLD_CONFIG.constants.GAME_WIDTH; j++) {
             var tileType = 'grass';
-            if (j === 10) {
+            if (j === 14) {
                 tileType = 'path_left';
             }
-            if (j === 11) {
+            if (j === 15) {
                 tileType = 'path';
             }
-            if (j === 12) {
+            if (j === 16) {
                 tileType = 'path_right';
             }
             var Tile = TILE.init($ASSETS, tileType);

@@ -6,8 +6,8 @@ var WORLD_CONFIG = {
     ASSET_LOCATION: window.location.href + '/../assets/',
     TILE_WIDTH:  50,
     TILE_HEIGHT: 50,
-    GAME_WIDTH: 22,
-    GAME_HEIGHT: 22
+    GAME_WIDTH: 30,
+    GAME_HEIGHT: 30
 };
 
 var TILE_NAMES = {
