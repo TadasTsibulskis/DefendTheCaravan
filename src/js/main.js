@@ -22,7 +22,7 @@ var setupControls = function () {
 
 var main = function () {
     function gameLoop() {
-        requestAnimationFrame(gameLoop);        
+        requestAnimationFrame(gameLoop);
         $GAME_CONTROLLER.run();
         $CANVAS.render($STAGE);
     }
@@ -35,6 +35,7 @@ var main = function () {
     var $INPUT_CONTROLLER = setupControls();
 
     /* DEBUGGING */
+    var $DTC = $DTC || {};
     $DTC.stage = $STAGE;
     $DTC.game_controller = $GAME_CONTROLLER;
     $DTC.input_controller = $INPUT_CONTROLLER;

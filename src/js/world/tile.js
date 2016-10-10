@@ -78,7 +78,7 @@ var tile = function ($ASSETS, type) {
 	sprite.width = WORLD_CONFIG.constants.TILE_WIDTH;
 	sprite.height = WORLD_CONFIG.constants.TILE_HEIGHT;
 	sprite.pivot._x = WORLD_CONFIG.constants.TILE_WIDTH / 2;
-	sprite.pivot._y = WORLD_CONFIG.constants.TILE_HEIGHT/ 2;
+	sprite.pivot._y = WORLD_CONFIG.constants.TILE_HEIGHT / 2;
 	sprite.type = tileName;
 	if (rotateable) {
 		sprite = rotateRandom(sprite);

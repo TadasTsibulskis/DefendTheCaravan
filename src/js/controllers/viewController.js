@@ -29,8 +29,9 @@ var setupStage = function () {
         var $WORLD = worldSetup.init(worldLoader.resources);
         var $UI = uiSetup.init();
         var $HERO = mainHero.init(worldLoader.resources);
-        
+
         /* DEBUG */
+        var $DTC = $DTC || {};
         $DTC.hero = $HERO;
 
         $STAGE.addChild($WORLD);
@@ -47,7 +48,7 @@ var setupStage = function () {
 var setupUi = function () {
 };
 
-var setupHero = function () {  
+var setupHero = function () {
 };
 
 module.exports = {

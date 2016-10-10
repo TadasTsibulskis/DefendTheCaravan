@@ -29,6 +29,8 @@ var buildWorld = function ($ASSETS, container) {
             container.addChild(Tile);
         }
     }
+
+    var $DTC = $DTC || {};
     $DTC.worldGrid = container;
     return container;
 };
@@ -46,10 +48,10 @@ var worldSetup = function ($ASSETS) {
     return WORLD;
 };
 
+// TODO : Use dynamic container + pixi container to determine which tiles get added to WORLD and thus rendered
+
 module.exports = {
     init: function ($ASSETS) {
         return worldSetup($ASSETS);
     }
 };
-
-// TODO : Use dynamic container + pixi container to determine which tiles get added to WORLD and thus rendered

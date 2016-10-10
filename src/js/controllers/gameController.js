@@ -1,14 +1,14 @@
 'use strict';
 
-var gameController = function ($VIEW_CONTROLLER) {
+var GameController = function ($VIEW_CONTROLLER) {
     // return object that contains functions that can be accessed 1 level up scope
 };
 
-gameController.prototype.run = function () {
+GameController.prototype.run = function () {
 };
 
 module.exports = {
     init: function () {
-        return new gameController();
+        return new GameController();
     }
 };

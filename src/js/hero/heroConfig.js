@@ -1,6 +1,5 @@
 'use strict';
 
-
 var HERO_CONFIG = {
     ASSET_LOCATION: '/src/assets/',
     HERO_WIDTH: 71,

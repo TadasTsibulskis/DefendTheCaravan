@@ -9,10 +9,10 @@ var GAME_CONFIG = {
     UI_WIDTH: 900,
     UI_HEIGHT: 80,
     RENDER_OPTIONS: {
-        antialias: false, 
-        transparent: false, 
+        antialias: false,
+        transparent: false,
         resolution: 1
-    },
+    }
 };
 
 var SELECTORS = {
