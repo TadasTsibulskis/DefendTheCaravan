@@ -1,18 +1,19 @@
 'use strict';
 
 var PIXI = require('pixi.js');
+// Removes console log
 PIXI.utils._saidHello = true;
 
 var GAME_CONFIG = {
-    GAME_WIDTH: 900,
-    GAME_HEIGHT: 506,
-    UI_WIDTH: 900,
+    GAME_WIDTH: 1334,
+    GAME_HEIGHT: 750,
+    UI_WIDTH: 1334,
     UI_HEIGHT: 80,
     RENDER_OPTIONS: {
-        antialias: false, 
-        transparent: false, 
+        antialias: false,
+        transparent: false,
         resolution: 1
-    },
+    }
 };
 
 var SELECTORS = {

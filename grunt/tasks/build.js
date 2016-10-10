@@ -5,6 +5,7 @@ module.exports = function(grunt) {
     grunt.registerTask(
         'build',
         [
+            'configureDeploy',
             'setCurrentFile:appJs',
 
             'incrementIfNeeded',
@@ -22,7 +23,7 @@ module.exports = function(grunt) {
             'concat:cssProd',
 
             // Finalize assets
-            'exec:checkoutDist',
+            // 'exec:checkoutDist',
             'cssmin:prod',
             'remove_usestrict',
 
@@ -33,13 +34,13 @@ module.exports = function(grunt) {
 
             // Deploy tickets, project meta update
             'copy',
-            'configureDeploy',
+            'configureDeploy'
             // 'deleteDuplicateMd5Assets',
-            'deploy',
-            'json_massager:saveVersions',
-            'exec:commit',
-            'reportDeployTicketStatuses',
-            'exec:notifySlack'
+            // 'deploy',
+            // 'json_massager:saveVersions',
+            // 'exec:commit',
+            // 'reportDeployTicketStatuses'
+            // 'exec:notifySlack'
         ]
     );
 };

@@ -2,7 +2,7 @@
 
 var GAME_CONFIG = require('../utils/gameConfig.js');
 
-var inputController = function () {
+var InputController = function () {
     function keyboard(keyCode) {
         var key = {};
         key.code = keyCode;
@@ -13,7 +13,9 @@ var inputController = function () {
 
         key.downHandler = function (event) {
             if (event.keyCode === key.code) {
-                if (key.isUp && key.press) key.press();
+                if (key.isUp && key.press) {
+                    key.press();
+                }
                 key.isDown = true;
                 key.isUp = false;
             }
@@ -22,7 +24,9 @@ var inputController = function () {
 
         key.upHandler = function (event) {
             if (event.keyCode === key.code) {
-                if (key.isDown && key.release) key.release();
+                if (key.isDown && key.release) {
+                    key.release();
+                }
                 key.isDown = false;
                 key.isUp = true;
             }
@@ -30,10 +34,10 @@ var inputController = function () {
         };
 
         window.addEventListener(
-            "keydown", key.downHandler.bind(key), false
+            'keydown', key.downHandler.bind(key), false
         );
         window.addEventListener(
-            "keyup", key.upHandler.bind(key), false
+            'keyup', key.upHandler.bind(key), false
         );
         return key;
     }
@@ -58,7 +62,7 @@ var inputController = function () {
     up.release = function () {
         console.log('Up Key released');
     };
-    
+
     right.press = function () {
         console.log('Right Key pressed');
     };
@@ -78,6 +82,6 @@ var inputController = function () {
 
 module.exports = {
     init: function () {
-        return new inputController();
+        return new InputController();
     }
-}
+};

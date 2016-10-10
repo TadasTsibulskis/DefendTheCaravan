@@ -114,7 +114,6 @@
     },
     "requireSpacesInForStatement": true,
     "safeContextKeyword": ["self"],
-    // "validateIndentation": 4,
     "validateParameterSeparator": ", ",
     "validateQuoteMarks": "'",
     "disallowPaddingNewlinesInBlocks": true

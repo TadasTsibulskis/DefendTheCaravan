@@ -13,13 +13,13 @@ var buildWorld = function ($ASSETS, container) {
     for (var i = 0; i < WORLD_CONFIG.constants.GAME_HEIGHT; i++) {
         for (var j = 0; j < WORLD_CONFIG.constants.GAME_WIDTH; j++) {
             var tileType = 'grass';
-            if (j === 10) {
+            if (j === 14) {
                 tileType = 'path_left';
             }
-            if (j === 11) {
+            if (j === 15) {
                 tileType = 'path';
             }
-            if (j === 12) {
+            if (j === 16) {
                 tileType = 'path_right';
             }
             var Tile = TILE.init($ASSETS, tileType);
@@ -29,6 +29,8 @@ var buildWorld = function ($ASSETS, container) {
             container.addChild(Tile);
         }
     }
+
+    var $DTC = $DTC || {};
     $DTC.worldGrid = container;
     return container;
 };
@@ -46,10 +48,10 @@ var worldSetup = function ($ASSETS) {
     return WORLD;
 };
 
+// TODO : Use dynamic container + pixi container to determine which tiles get added to WORLD and thus rendered
+
 module.exports = {
     init: function ($ASSETS) {
         return worldSetup($ASSETS);
     }
 };
-
-// TODO : Use dynamic container + pixi container to determine which tiles get added to WORLD and thus rendered
