@@ -31,7 +31,6 @@ var setupStage = function () {
         var $HERO = mainHero.init(worldLoader.resources);
 
         /* DEBUG */
-        var $DTC = $DTC || {};
         $DTC.hero = $HERO;
 
         $STAGE.addChild($WORLD);

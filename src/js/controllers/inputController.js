@@ -33,12 +33,8 @@ var InputController = function () {
             event.preventDefault();
         };
 
-        window.addEventListener(
-            'keydown', key.downHandler.bind(key), false
-        );
-        window.addEventListener(
-            'keyup', key.upHandler.bind(key), false
-        );
+        window.addEventListener('keydown', key.downHandler.bind(key), false);
+        window.addEventListener('keyup', key.upHandler.bind(key), false);
         return key;
     }
 

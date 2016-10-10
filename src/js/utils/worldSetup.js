@@ -30,7 +30,6 @@ var buildWorld = function ($ASSETS, container) {
         }
     }
 
-    var $DTC = $DTC || {};
     $DTC.worldGrid = container;
     return container;
 };

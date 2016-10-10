@@ -3,14 +3,15 @@
 var PIXI = require('pixi.js');
 // Removes console log
 PIXI.utils._saidHello = true;
+PIXI.SCALE_MODES.DEFAULT = PIXI.SCALE_MODES.NEAREST;
 
 var GAME_CONFIG = {
-    GAME_WIDTH: 1334,
-    GAME_HEIGHT: 750,
+    GAME_WIDTH: 800,
+    GAME_HEIGHT: 450,
     UI_WIDTH: 1334,
     UI_HEIGHT: 80,
     RENDER_OPTIONS: {
-        antialias: false,
+        antialias: true,
         transparent: false,
         resolution: 1
     }
