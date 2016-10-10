@@ -1,5 +1,5 @@
 {
-  "name": "nameWIP",
+  "name": "SandBox",
   "version": "1.0.0",
   "description": "JS (name pending)",
   "main": "src/index.js",
@@ -8,24 +8,24 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/TadasTsibulskis/TowerDefenseJS.git"
+    "url": "git+https://github.com/TadasTsibulskis/SandBoxJS.git"
   },
   "author": "Tadas Tsibulskis",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/TadasTsibulskis/TowerDefenseJS/issues"
   },
-  "appName": "test",
+  "appName": "SandBox",
   "deployableFiles": {
     "appJs": {
       "path": "dist/js/",
       "filetype": "js",
-      "basename": "test"
+      "basename": "sandbox"
     },
     "appCss": {
       "path": "dist/css/",
       "filetype": "css",
-      "basename": "test"
+      "basename": "sandbox"
     }
   },
   "devDependencies": {
