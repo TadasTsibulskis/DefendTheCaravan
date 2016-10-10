@@ -1,7 +1,7 @@
 'use strict';
 
 var HERO_CONFIG = {
-    ASSET_LOCATION: '/src/assets/',
+    ASSET_LOCATION: window.location.href + '/../assets/',
     HERO_WIDTH: 71,
     HERO_HEIGHT: 159
 };
