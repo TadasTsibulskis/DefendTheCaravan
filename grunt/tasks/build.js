@@ -23,24 +23,15 @@ module.exports = function(grunt) {
             'concat:cssProd',
 
             // Finalize assets
-            // 'exec:checkoutDist',
             'cssmin:prod',
             'remove_usestrict',
 
             // HTML
-            // 'strip_code',
             'uglify',
             'configureDeploy',
 
-            // Deploy tickets, project meta update
             'copy',
             'configureDeploy'
-            // 'deleteDuplicateMd5Assets',
-            // 'deploy',
-            // 'json_massager:saveVersions',
-            // 'exec:commit',
-            // 'reportDeployTicketStatuses'
-            // 'exec:notifySlack'
         ]
     );
 };
