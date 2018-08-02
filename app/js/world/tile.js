@@ -44,25 +44,25 @@ var tile = function ($ASSETS, type) {
 	var tileName = '';
 	var rotateable = false;
 	switch (type) {
-		case 'grass' : {
+		case 'grass-01' : {
 			tileName = WORLD_CONFIG.tile_names.grass;
 			rotateable = true;
 			break;
 		}
 
-		case 'path' : {
+		case 'path-01' : {
 			tileName = WORLD_CONFIG.tile_names.path;
 			rotateable = true;
 			break;
 		}
 
-		case 'path_left' : {
+		case 'path-01left' : {
 			tileName = WORLD_CONFIG.tile_names.path_left;
 			rotateable = false;
 			break;
 		}
 
-		case 'path_right' : {
+		case 'path-01right' : {
 			tileName = WORLD_CONFIG.tile_names.path_right;
 			rotateable = false;
 			break;

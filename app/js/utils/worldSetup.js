@@ -12,15 +12,15 @@ var buildWorld = function ($ASSETS, container) {
 
     for (var i = 0; i < WORLD_CONFIG.constants.GAME_HEIGHT; i++) {
         for (var j = 0; j < WORLD_CONFIG.constants.GAME_WIDTH; j++) {
-            var tileType = 'grass';
+            var tileType = 'grass-01';
             if (j === 14) {
-                tileType = 'path_left';
+                tileType = 'path-01left';
             }
             if (j === 15) {
-                tileType = 'path';
+                tileType = 'path-01';
             }
             if (j === 16) {
-                tileType = 'path_right';
+                tileType = 'path-01right';
             }
             var Tile = TILE.init($ASSETS, tileType);
             Tile.x = Math.floor(j * WORLD_CONFIG.constants.TILE_WIDTH);

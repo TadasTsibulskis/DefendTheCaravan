@@ -24,6 +24,7 @@ var main = function () {
     function gameLoop() {
         requestAnimationFrame(gameLoop);
         $GAME_CONTROLLER.run();
+        debugger;
         $CANVAS.render($STAGE);
     }
 

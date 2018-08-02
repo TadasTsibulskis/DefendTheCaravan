@@ -2,8 +2,8 @@
 
 var PIXI = require('pixi.js');
 // Removes console log
-PIXI.utils._saidHello = true;
-PIXI.SCALE_MODES.DEFAULT = PIXI.SCALE_MODES.NEAREST;
+PIXI.utils.skipHello();
+PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 
 var GAME_CONFIG = {
     GAME_WIDTH: 800,
