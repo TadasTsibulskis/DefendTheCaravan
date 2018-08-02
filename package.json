@@ -1,10 +1,10 @@
 {
-  "name": "SandBoxJS",
-  "version": "1.0.0",
-  "description": "SandBoxJS",
+  "name": "DefendTheCaravan",
+  "version": "0.0.1",
+  "description": "A JavaScript defense game",
   "main": "src/index.js",
   "scripts": {
-    "test": "SandBoxJS"
+    "test": ""
   },
   "repository": {
     "type": "git",
@@ -13,7 +13,7 @@
   "author": "Tadas Tsibulskis",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/TadasTsibulskis/TowerDefenseJS/issues"
+    "url": "https://github.com/TadasTsibulskis/SandBoxJS/issues"
   },
   "appName": "SandBoxJS",
   "deployableFiles": {
