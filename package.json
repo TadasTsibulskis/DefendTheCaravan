@@ -4,7 +4,7 @@
   "description": "A JavaScript defense game",
   "main": "app/index.html",
   "scripts": {
-    "start": "webpack-dev-server --env local --open --config webpack.config.js"
+    "start": "webpack && webpack-dev-server --env local --open --config webpack.config.js"
   },
   "repository": {
     "type": "git",
@@ -26,6 +26,7 @@
     "babel-preset-airbnb": "^2.4.0",
     "babel-preset-env": "^1.6.1",
     "babel-preset-react": "^6.24.1",
+    "copy-webpack-plugin": "^4.5.2",
     "crypto-js": "^3.1.9-1",
     "css-loader": "^0.28.10",
     "enzyme-adapter-react-16": "^1.1.0",
@@ -50,7 +51,6 @@
     "yarn": "^1.7.0"
   },
   "dependencies": {
-    "freezer-js": "^0.13.0",
     "pixi.js": "^4.0.1",
     "react": "^16.2.0",
     "react-dom": "^16.1.1",

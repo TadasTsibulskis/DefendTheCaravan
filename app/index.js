@@ -1,18 +1,16 @@
-var $GAME = require('./js/main.js');
-
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Root from './Root';
+import DefendTheCaravan from './engine';
 import './styles.scss';
 
 const render = (Component) => {
   ReactDOM.render(
-    <Component />,
-    document.getElementById('stage'),
+    <Component selector={'stage'} />,
+    document.getElementById('stage')
   );
 };
 
-render(Root);
+render(DefendTheCaravan);
 
 if (module.hot) module.hot.accept();
 

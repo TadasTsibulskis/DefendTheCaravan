@@ -20,13 +20,14 @@ var setupControls = function () {
     return inputController.init();
 };
 
-var main = function () {
+export default function Main() {
+    
     function gameLoop() {
         requestAnimationFrame(gameLoop);
         $GAME_CONTROLLER.run();
-        debugger;
         $CANVAS.render($STAGE);
     }
+    
 
     // TOOD : Move loader into this file to ensure all loading is done before game loop starts
 
@@ -47,10 +48,5 @@ var main = function () {
     /*           */
 
     gameLoop();
-};
-
-module.exports = {
-    init: function () {
-        main();
-    }
+    
 };

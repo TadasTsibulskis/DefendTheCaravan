@@ -30,9 +30,6 @@ var setupStage = function () {
         var $UI = uiSetup.init();
         var $HERO = mainHero.init(worldLoader.resources);
 
-        /* DEBUG */
-        $DTC.hero = $HERO;
-
         $STAGE.addChild($WORLD);
         $STAGE.addChild($UI);
         $STAGE.addChild($HERO);
