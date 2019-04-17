@@ -1,3 +1,8 @@
+import Game from './js/main';
+
+window.game = new Game();
+
+/*
 import Phaser from "phaser";
 import logoImg from "./assets/logo.png";
 
@@ -29,4 +34,4 @@ function create() {
     yoyo: true,
     loop: -1
   });
-}
+}*/

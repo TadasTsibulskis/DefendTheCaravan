@@ -1,2 +1,3 @@
 # TODO
-- Add Chunks to webpack
+- Codesplitting
+- Eslint

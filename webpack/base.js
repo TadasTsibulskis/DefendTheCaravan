@@ -6,6 +6,7 @@ const CleanWebpackPlugin = require("clean-webpack-plugin");
 module.exports = {
   mode: "development",
   devtool: "eval-source-map",
+
   module: {
     rules: [
       {
@@ -25,6 +26,7 @@ module.exports = {
       }
     ]
   },
+
   plugins: [
     new CleanWebpackPlugin(["dist"], {
       root: path.resolve(__dirname, "../")
@@ -36,5 +38,11 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: "./index.html"
     })
-  ]
+  ],
+
+  resolve: {
+    alias: {
+      assets: path.resolve(__dirname, "../src/assets"),
+    }
+  },
 };
